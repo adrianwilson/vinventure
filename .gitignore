@@ -96,6 +96,17 @@ cdk.out/
 # Build outputs
 build/
 dist/
+apps/spa-build/
+
+# Infrastructure build artifacts
+apps/infrastructure/cdk.out/
+
+# Compiled TypeScript files (exclude config files and scripts)
+*.js
+*.d.ts
+!*.config.js
+!scripts/*.js
+!mobile/*.js
 
 # Prisma generated client
 apps/src/generated/
@@ -119,3 +130,7 @@ ios/Pods/
 # React Native
 .expo/
 .expo-shared/
+
+# Lambda builds
+lambda/
+lambda-layers/

@@ -22,6 +22,9 @@
     "infrastructure:deploy": "nx run infrastructure:deploy",
     "infrastructure:synth": "nx run infrastructure:synth",
     "infrastructure:diff": "nx run infrastructure:diff",
+    "deploy": "./scripts/deploy.sh",
+    "deploy:dev": "./scripts/deploy.sh dev",
+    "deploy:prod": "./scripts/deploy.sh production",
     "graph": "nx graph",
     "affected:test": "nx affected:test",
     "affected:build": "nx affected:build",
@@ -29,6 +32,7 @@
   },
   "private": true,
   "dependencies": {
+    "@heroicons/react": "^2.0.18",
     "@prisma/client": "^6.10.1",
     "firebase": "^11.9.1",
     "firebase-admin": "^13.4.0",

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@aws-solutions-constructs/aws-cloudfront-s3": "^2.85.6"
+  }
+}

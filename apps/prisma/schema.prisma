@@ -42,12 +42,14 @@ enum ExperienceType {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  phone     String?
-  role      UserRole @default(GUEST)
-  avatarUrl String?
+  id          String   @id @default(cuid())
+  firebaseUid String   @unique
+  email       String   @unique
+  name        String?
+  phone       String?
+  role        UserRole @default(GUEST)
+  avatarUrl   String?
+  preferences Json?
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -88,6 +90,9 @@ model Winery {
   foundedYear Int?
   wineTypes   String[]
   sustainable Boolean      @default(false)
+  sustainablePractices Boolean @default(false)
+  featured    Boolean      @default(false)
+  rating      Float?
   
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
@@ -123,6 +128,7 @@ model Experience {
   // Requirements
   ageRestriction Int?
   requirements   String?
+  rating         Float?
   
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
