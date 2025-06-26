@@ -1,0 +1,17 @@
+{
+  "recommendations": [
+    "nrwl.angular-console",
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "ms-playwright.playwright",
+    "firsttris.vscode-jest-runner",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+    "prisma.prisma",
+    "ms-vscode.vscode-json",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "ms-vscode.vscode-thunder-client",
+    "github.copilot"
+  ]
+}

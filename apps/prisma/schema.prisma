@@ -1,0 +1,204 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  GUEST
+  WINERY_ADMIN
+  PLATFORM_ADMIN
+}
+
+enum WineryStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum ExperienceType {
+  TASTING
+  TOUR
+  VIRTUAL_EVENT
+  PRIVATE_EVENT
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  phone     String?
+  role      UserRole @default(GUEST)
+  avatarUrl String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  wineries         Winery[]
+  bookings         Booking[]
+  reviews          Review[]
+  favoriteWineries FavoriteWinery[]
+  
+  @@map("users")
+}
+
+model Winery {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  email       String
+  phone       String?
+  website     String?
+  status      WineryStatus  @default(PENDING)
+  
+  // Location
+  address     String
+  city        String
+  region      String
+  country     String
+  zipCode     String?
+  latitude    Float?
+  longitude   Float?
+  
+  // Media
+  logoUrl     String?
+  bannerUrl   String?
+  images      String[]
+  
+  // Business details
+  foundedYear Int?
+  wineTypes   String[]
+  sustainable Boolean      @default(false)
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  
+  // Relations
+  ownerId     String
+  owner       User         @relation(fields: [ownerId], references: [id])
+  experiences Experience[]
+  bookings    Booking[]
+  reviews     Review[]
+  favorites   FavoriteWinery[]
+  
+  @@map("wineries")
+}
+
+model Experience {
+  id          String         @id @default(cuid())
+  title       String
+  description String
+  type        ExperienceType
+  duration    Int            // minutes
+  price       Float
+  maxGuests   Int
+  
+  // Scheduling
+  availableDays String[]      // ["monday", "tuesday", etc.]
+  startTime     String        // "10:00"
+  endTime       String        // "17:00"
+  
+  // Media
+  images      String[]
+  
+  // Requirements
+  ageRestriction Int?
+  requirements   String?
+  
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  wineryId    String
+  winery      Winery    @relation(fields: [wineryId], references: [id])
+  bookings    Booking[]
+  
+  @@map("experiences")
+}
+
+model Booking {
+  id            String        @id @default(cuid())
+  bookingDate   DateTime
+  guestCount    Int
+  totalAmount   Float
+  status        BookingStatus @default(PENDING)
+  
+  // Payment
+  stripePaymentId String?
+  paidAt          DateTime?
+  
+  // Guest details
+  guestName     String
+  guestEmail    String
+  guestPhone    String?
+  specialRequests String?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  userId        String
+  user          User       @relation(fields: [userId], references: [id])
+  wineryId      String
+  winery        Winery     @relation(fields: [wineryId], references: [id])
+  experienceId  String
+  experience    Experience @relation(fields: [experienceId], references: [id])
+  review        Review?
+  
+  @@map("bookings")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int      // 1-5 stars
+  comment   String?
+  images    String[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  wineryId  String
+  winery    Winery   @relation(fields: [wineryId], references: [id])
+  bookingId String   @unique
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+  
+  @@map("reviews")
+}
+
+model FavoriteWinery {
+  id       String @id @default(cuid())
+  
+  createdAt DateTime @default(now())
+  
+  // Relations
+  userId   String
+  user     User   @relation(fields: [userId], references: [id])
+  wineryId String
+  winery   Winery @relation(fields: [wineryId], references: [id])
+  
+  @@unique([userId, wineryId])
+  @@map("favorite_wineries")
+}
