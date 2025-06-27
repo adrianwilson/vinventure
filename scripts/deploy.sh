@@ -27,12 +27,16 @@ echo "🏷️  Environment: $ENVIRONMENT"
 
 # Step 1: Deploy CDK Infrastructure
 echo "🏗️  Deploying infrastructure..."
-cd apps/infrastructure
 
-# Install CDK dependencies if needed
-if [ ! -d "node_modules" ]; then
+# Install dependencies if needed
+if [ ! -d "infrastructure/node_modules" ]; then
     echo "📥 Installing CDK dependencies..."
-    npm install
+    npm install --prefix infrastructure
+fi
+
+if [ ! -d "apps/web/node_modules" ]; then
+    echo "📥 Installing app dependencies..."
+    npm install --prefix apps/web
 fi
 
 # Bootstrap CDK if needed
@@ -41,21 +45,15 @@ if ! aws cloudformation describe-stacks --stack-name CDKToolkit > /dev/null 2>&1
     npx cdk bootstrap
 fi
 
-# Build Lambda functions first
-echo "🔧 Building Lambda functions..."
-cd ../
-./scripts/build-lambda.sh
-
-cd apps/infrastructure
-
 # Deploy the stack
 echo "🚀 Deploying VinVenture Lambda stack..."
+cd infrastructure
 npx cdk deploy VinventureLambdaStack --context environment=$ENVIRONMENT --require-approval never
 
 # Lambda functions are deployed automatically with CDK
 echo "✅ Lambda functions deployed successfully!"
 
-cd ../..
+cd ../../..
 
 # Step 4: Run Database Migrations
 echo "🗄️  Running database migrations..."

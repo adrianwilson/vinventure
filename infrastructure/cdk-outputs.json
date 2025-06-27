@@ -1,0 +1,12 @@
+{
+  "VinventureLambdaStack": {
+    "ApiGatewayUrl": "https://ilb4ej2fzc.execute-api.ca-central-1.amazonaws.com/prod/",
+    "MediaBucketName": "vinventurelambdastack-vinventuremediabucketab2b41b-6bfyj8idhpkx",
+    "FirebaseSecretArn": "arn:aws:secretsmanager:ca-central-1:216168213630:secret:FirebaseSecret3040086C-czT3Y5idZSqG-Y9X0zI",
+    "CloudFrontUrl": "https://d1r5q9suf2pw18.cloudfront.net",
+    "DatabaseSecretArn": "arn:aws:secretsmanager:ca-central-1:216168213630:secret:DatabaseSecret86DBB7B3-yQ6LrYrkQPl1-GllKYP",
+    "ApiLambdaArn": "arn:aws:lambda:ca-central-1:216168213630:function:VinventureLambdaStack-VinventureApiFunctionB6D80BA-Z7D9JJwJUJph",
+    "VinventureApiEndpoint9F8186E2": "https://ilb4ej2fzc.execute-api.ca-central-1.amazonaws.com/prod/",
+    "DatabaseEndpoint": "vinventurelambdastack-vinventuredatabase1f4356ed-zvdcos4sidsa.cluster-clqxy0tjtjkf.ca-central-1.rds.amazonaws.com"
+  }
+}

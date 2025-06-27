@@ -96,7 +96,6 @@ cdk.out/
 # Build outputs
 build/
 dist/
-apps/spa-build/
 
 # Infrastructure build artifacts
 apps/infrastructure/cdk.out/
@@ -107,6 +106,7 @@ apps/infrastructure/cdk.out/
 !*.config.js
 !scripts/*.js
 !mobile/*.js
+!lambda/*.js
 
 # Prisma generated client
 apps/src/generated/

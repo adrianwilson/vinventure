@@ -1,0 +1,118 @@
+{
+  "name": "web",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/web/src",
+  "projectType": "application",
+  "tags": ["type:app", "scope:web"],
+  "targets": {
+    "build": {
+      "executor": "@nx/next:build",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/web"
+      },
+      "configurations": {
+        "development": {
+          "outputPath": "apps/web"
+        },
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/next:server",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "web:build",
+        "dev": true,
+        "port": 3000
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "web:build:development",
+          "dev": true
+        },
+        "production": {
+          "buildTarget": "web:build:production",
+          "dev": false
+        }
+      }
+    },
+    "dev": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "next dev --port 3000",
+        "cwd": "apps/web"
+      }
+    },
+    "export": {
+      "executor": "@nx/next:export",
+      "options": {
+        "buildTarget": "web:build:production"
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/web/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "coverageReporters": ["text"]
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/web/**/*.{ts,tsx,js,jsx}"]
+      }
+    },
+    "db:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma generate",
+        "cwd": "apps/web"
+      }
+    },
+    "db:push": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma db push",
+        "cwd": "apps/web"
+      }
+    },
+    "db:migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate dev",
+        "cwd": "apps/web"
+      }
+    },
+    "db:studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma studio",
+        "cwd": "apps/web"
+      }
+    },
+    "db:seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsx prisma/seed.ts",
+        "cwd": "apps/web"
+      }
+    },
+    "type-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc --noEmit",
+        "cwd": "apps/web"
+      }
+    }
+  }
+}
