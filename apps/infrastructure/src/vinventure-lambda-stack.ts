@@ -362,7 +362,7 @@ export class VinventureLambdaStack extends cdk.Stack {
 
     // Deploy HTML pages with no cache
     new s3deploy.BucketDeployment(this, 'VinventureHtmlPages', {
-      sources: [s3deploy.Source.asset('../../dist/apps/web')],
+      sources: [s3deploy.Source.asset('../../dist/apps/web/.next')],
       destinationBucket: websiteBucket,
       cacheControl: [
         s3deploy.CacheControl.fromString('public, max-age=0, must-revalidate'), // HTML files

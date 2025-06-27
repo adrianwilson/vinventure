@@ -16,6 +16,13 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["development"]
+    "customConditions": ["development"],
+    "baseUrl": ".",
+    "paths": {
+      "@vinventure/ui/*": ["libs/ui/src/*"],
+      "@vinventure/types/*": ["libs/types/src/*"],
+      "@vinventure/database/*": ["libs/database/src/*"],
+      "@vinventure/shared/*": ["libs/shared/src/*"]
+    }
   }
 }

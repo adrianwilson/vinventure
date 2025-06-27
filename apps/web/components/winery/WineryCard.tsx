@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Winery, EXPERIENCE_TYPE_LABELS } from '@vinventure/types';
+import { Winery, EXPERIENCE_TYPE_LABELS } from '@vinventure/types/types/winery';
 
 // Icon components
 const MapPinIcon = ({ className }: { className?: string }) => (

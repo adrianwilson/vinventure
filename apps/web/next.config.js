@@ -19,6 +19,18 @@ const nextConfig = {
     unoptimized: true,
   },
   
+  // Configure webpack to resolve TypeScript path aliases
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@vinventure/ui': require('path').resolve(__dirname, '../../libs/ui/src'),
+      '@vinventure/types': require('path').resolve(__dirname, '../../libs/types/src'),
+      '@vinventure/database': require('path').resolve(__dirname, '../../libs/database/src'),
+      '@vinventure/shared': require('path').resolve(__dirname, '../../libs/shared/src'),
+    };
+    return config;
+  },
+  
   // Skip build errors for Lambda deployment
   eslint: {
     ignoreDuringBuilds: true,

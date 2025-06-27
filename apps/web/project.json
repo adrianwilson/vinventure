@@ -1,7 +1,7 @@
 {
   "name": "web",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/web/src",
+  "sourceRoot": "apps/web",
   "projectType": "application",
   "tags": ["type:app", "scope:web"],
   "targets": {
@@ -36,13 +36,6 @@
           "buildTarget": "web:build:production",
           "dev": false
         }
-      }
-    },
-    "dev": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "next dev --port 3000",
-        "cwd": "apps/web"
       }
     },
     "export": {

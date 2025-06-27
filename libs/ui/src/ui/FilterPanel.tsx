@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { WineryFilters, WINE_TYPES } from '@vinventure/types';
+import { WineryFilters, WINE_TYPES } from '@vinventure/types/types/winery';
 
 // Icon components
 const FunnelIcon = ({ className }: { className?: string }) => (
