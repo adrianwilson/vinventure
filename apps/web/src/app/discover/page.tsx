@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Navigation from '../../components/ui/Navigation';
-import SearchBar from '../../components/ui/SearchBar';
-import FilterPanel from '../../components/ui/FilterPanel';
+import { SearchBar } from '@vinventure/ui';
+import { FilterPanel } from '@vinventure/ui';
 import WineryGrid from '../../components/winery/WineryGrid';
-import Pagination from '../../components/ui/Pagination';
-import { WineryFilters, WinerySearchResponse } from '../../types/winery';
+import { Pagination } from '@vinventure/ui';
+import { WineryFilters, WinerySearchResponse } from '@vinventure/types';
 import { searchWineries } from '../../lib/mock-data';
 
 const initialFilters: WineryFilters = {

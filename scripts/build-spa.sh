@@ -28,7 +28,7 @@ npm run build
 if [ $? -eq 0 ]; then
     echo "Build successful!"
     
-    echo "Static build ready in dist/web/"
+    echo "Static build ready in dist/apps/web/"
 else
     echo "Build failed!"
 fi

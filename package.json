@@ -53,8 +53,6 @@
   },
   "workspaces": [
     "apps/*",
-    "infrastructure",
-    "shared",
-    "mobile"
+    "libs/*"
   ]
 }

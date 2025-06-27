@@ -13,7 +13,7 @@ const nextConfig = {
   
   // Static export for S3/CloudFront deployment
   output: 'export',
-  distDir: '../../dist/web',
+  distDir: '.next',
   trailingSlash: true,
   images: {
     unoptimized: true,

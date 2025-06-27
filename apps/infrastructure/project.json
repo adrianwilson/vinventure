@@ -1,7 +1,7 @@
 {
   "name": "infrastructure",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "infrastructure/src",
+  "sourceRoot": "apps/infrastructure/src",
   "projectType": "application",
   "tags": ["type:infrastructure", "scope:aws"],
   "targets": {
@@ -9,42 +9,42 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "tsc",
-        "cwd": "infrastructure"
+        "cwd": "apps/infrastructure"
       }
     },
     "synth": {
       "executor": "nx:run-commands",
       "options": {
         "command": "cdk synth",
-        "cwd": "infrastructure"
+        "cwd": "apps/infrastructure"
       }
     },
     "deploy": {
       "executor": "nx:run-commands",
       "options": {
         "command": "cdk deploy --require-approval never",
-        "cwd": "infrastructure"
+        "cwd": "apps/infrastructure"
       }
     },
     "diff": {
       "executor": "nx:run-commands",
       "options": {
         "command": "cdk diff",
-        "cwd": "infrastructure"
+        "cwd": "apps/infrastructure"
       }
     },
     "destroy": {
       "executor": "nx:run-commands",
       "options": {
         "command": "cdk destroy --force",
-        "cwd": "infrastructure"
+        "cwd": "apps/infrastructure"
       }
     },
     "bootstrap": {
       "executor": "nx:run-commands",
       "options": {
         "command": "cdk bootstrap",
-        "cwd": "infrastructure"
+        "cwd": "apps/infrastructure"
       }
     }
   }

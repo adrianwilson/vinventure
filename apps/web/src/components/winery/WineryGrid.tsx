@@ -1,6 +1,6 @@
 'use client';
 
-import { Winery } from '../../types/winery';
+import { Winery } from '@vinventure/types';
 import WineryCard from './WineryCard';
 
 interface WineryGridProps {

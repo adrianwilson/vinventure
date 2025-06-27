@@ -23,7 +23,10 @@
     "aws-jwt-verify": "^4.0.1",
     "next": "~15.2.4",
     "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react-dom": "19.0.0",
+    "@vinventure/ui": "*",
+    "@vinventure/types": "*",
+    "@vinventure/database": "*"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",

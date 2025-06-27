@@ -273,7 +273,7 @@ export class VinventureLambdaStack extends cdk.Stack {
     // API Lambda Function (handles all API routes)
     const apiFunction = new lambda.Function(this, 'VinventureApiFunction', {
       runtime: lambda.Runtime.NODEJS_18_X,
-      code: lambda.Code.fromAsset('../lambda'),
+      code: lambda.Code.fromAsset('../../lambda'),
       handler: 'api-handler.handler',
       timeout: cdk.Duration.seconds(30),
       memorySize: isProduction ? 1024 : 512,
@@ -362,7 +362,7 @@ export class VinventureLambdaStack extends cdk.Stack {
 
     // Deploy HTML pages with no cache
     new s3deploy.BucketDeployment(this, 'VinventureHtmlPages', {
-      sources: [s3deploy.Source.asset('../dist/web')],
+      sources: [s3deploy.Source.asset('../../dist/apps/web')],
       destinationBucket: websiteBucket,
       cacheControl: [
         s3deploy.CacheControl.fromString('public, max-age=0, must-revalidate'), // HTML files

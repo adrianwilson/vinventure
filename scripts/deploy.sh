@@ -29,9 +29,9 @@ echo "🏷️  Environment: $ENVIRONMENT"
 echo "🏗️  Deploying infrastructure..."
 
 # Install dependencies if needed
-if [ ! -d "infrastructure/node_modules" ]; then
+if [ ! -d "apps/infrastructure/node_modules" ]; then
     echo "📥 Installing CDK dependencies..."
-    npm install --prefix infrastructure
+    npm install --prefix apps/infrastructure
 fi
 
 if [ ! -d "apps/web/node_modules" ]; then
@@ -47,7 +47,7 @@ fi
 
 # Deploy the stack
 echo "🚀 Deploying VinVenture Lambda stack..."
-cd infrastructure
+cd apps/infrastructure
 npx cdk deploy VinventureLambdaStack --context environment=$ENVIRONMENT --require-approval never
 
 # Lambda functions are deployed automatically with CDK
