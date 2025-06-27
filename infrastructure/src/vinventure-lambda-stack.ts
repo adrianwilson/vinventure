@@ -273,7 +273,7 @@ export class VinventureLambdaStack extends cdk.Stack {
     // API Lambda Function (handles all API routes)
     const apiFunction = new lambda.Function(this, 'VinventureApiFunction', {
       runtime: lambda.Runtime.NODEJS_18_X,
-      code: lambda.Code.fromAsset('../../lambda'),
+      code: lambda.Code.fromAsset('../lambda'),
       handler: 'api-handler.handler',
       timeout: cdk.Duration.seconds(30),
       memorySize: isProduction ? 1024 : 512,
