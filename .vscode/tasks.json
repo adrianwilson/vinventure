@@ -4,8 +4,8 @@
     {
       "label": "Start Next.js Dev Server",
       "type": "shell",
-      "command": "nx",
-      "args": ["dev", "apps"],
+      "command": "npm",
+      "args": ["run", "dev"],
       "options": {
         "cwd": "${workspaceFolder}"
       },

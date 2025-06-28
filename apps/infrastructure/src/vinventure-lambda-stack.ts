@@ -212,28 +212,34 @@ export class VinventureLambdaStack extends cdk.Stack {
       },
     });
 
-    // Website hosting using AWS Solutions Constructs
-    const website = new CloudFrontToS3(this, 'VinventureWebsite', {
-      cloudFrontDistributionProps: {
-        errorResponses: [
-          {
-            httpStatus: 403,
-            responseHttpStatus: 200,
-            responsePagePath: '/index.html',
-          },
-          {
-            httpStatus: 404,
-            responseHttpStatus: 200,
-            responsePagePath: '/index.html',
-          },
-        ],
-      },
-      insertHttpSecurityHeaders: false,
+    const noBlock = new s3.BlockPublicAccess({
+      blockPublicAcls: false,
+      ignorePublicAcls: false,
+      blockPublicPolicy: false,
+      restrictPublicBuckets: false,
     });
 
-    // Get references to the created resources
-    const websiteBucket = website.s3Bucket!;
-    const distribution = website.cloudFrontWebDistribution;
+    const websiteBucket = new s3.Bucket(this, 'VinventureWebsiteBucket', {
+      websiteIndexDocument: 'index.html',
+      websiteErrorDocument: 'index.html', // only if fallback needed
+      publicReadAccess: true, // must be true when using website endpoint
+      blockPublicAccess: noBlock,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: true,
+    });
+
+    const origin = new origins.HttpOrigin(`${websiteBucket.bucketWebsiteDomainName}`, {
+      protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY, // website endpoint only supports HTTP
+    });
+    
+    const distribution = new cloudfront.Distribution(this, 'VinventureDistribution', {
+      defaultBehavior: {
+        origin,
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      },
+      defaultRootObject: 'index.html',
+    });
+
 
     // Lambda Layer for shared dependencies (will be added later)
     // const dependenciesLayer = new lambda.LayerVersion(this, 'VinventureDependenciesLayer', {
