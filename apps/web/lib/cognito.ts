@@ -191,6 +191,26 @@ export class CognitoAuthService {
     }
   }
 
+  static async confirmSignUp(email: string, confirmationCode: string): Promise<void> {
+    if (!this.isConfigured()) {
+      throw new Error('Cognito is not configured. Please set up Cognito credentials.');
+    }
+
+    const client = this.getClient();
+
+    try {
+      const command = new ConfirmSignUpCommand({
+        ClientId: this.config.clientId,
+        Username: email,
+        ConfirmationCode: confirmationCode,
+      });
+
+      await client.send(command);
+    } catch (error: any) {
+      throw new Error(error.message || 'Email confirmation failed');
+    }
+  }
+
   static async confirmForgotPassword(
     email: string,
     confirmationCode: string,

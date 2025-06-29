@@ -34,6 +34,9 @@ npm install --prefix apps/infrastructure
 echo "📥 Installing app dependencies..."
 npm install --prefix apps/web
 
+echo "🔨 Building web application..."
+npm run build --prefix apps/web
+
 # Bootstrap CDK if needed
 if ! aws cloudformation describe-stacks --stack-name CDKToolkit > /dev/null 2>&1; then
     echo "🔧 Bootstrapping CDK..."

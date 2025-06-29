@@ -10,7 +10,8 @@ interface AuthContextType {
   loading: boolean;
   isAvailable: boolean;
   signIn: (email: string, password: string) => Promise<CognitoUser>;
-  signUp: (email: string, password: string, displayName: string, role?: 'GUEST' | 'WINERY_ADMIN') => Promise<CognitoUser>;
+  signUp: (email: string, password: string, displayName: string, role?: 'GUEST' | 'WINERY_ADMIN') => Promise<{ user: any; confirmationRequired: boolean }>;
+  confirmEmail: (email: string, code: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
 }
@@ -73,15 +74,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     password: string, 
     displayName: string, 
     role: 'GUEST' | 'WINERY_ADMIN' = 'GUEST'
-  ): Promise<CognitoUser> => {
-    const result = await CognitoAuthService.signUp({ email, password, name: displayName });
-    
-    if (result.confirmationRequired) {
-      throw new Error('Email confirmation required. Please check your email.');
-    }
-    
-    // Auto sign in after successful registration
-    return await signIn(email, password);
+  ): Promise<{ user: any; confirmationRequired: boolean }> => {
+    return await CognitoAuthService.signUp({ email, password, name: displayName });
+  };
+
+  const confirmEmail = async (email: string, code: string): Promise<void> => {
+    await CognitoAuthService.confirmSignUp(email, code);
   };
 
   const signOut = async (): Promise<void> => {
@@ -108,6 +106,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAvailable,
     signIn,
     signUp,
+    confirmEmail,
     signOut,
     resetPassword,
   };

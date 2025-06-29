@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { EmailVerificationForm } from './EmailVerificationForm';
 
 interface RegisterFormProps {
   onToggleMode?: () => void;
@@ -18,8 +19,10 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
   
-  const { signUp, isAvailable } = useAuth();
+  const { signUp, confirmEmail, signIn, isAvailable } = useAuth();
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -54,7 +57,47 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
     }
 
     try {
-      const user = await signUp(formData.email, formData.password, formData.name, formData.role);
+      const result = await signUp(formData.email, formData.password, formData.name, formData.role);
+      
+      if (result.confirmationRequired) {
+        setRegisteredEmail(formData.email);
+        setShowEmailVerification(true);
+      } else {
+        // Auto sign in after successful registration
+        const user = await signIn(formData.email, formData.password);
+        
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            uid: user.username,
+            email: user.email,
+            displayName: formData.name,
+            role: formData.role,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create user profile');
+        }
+
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailVerification = async (code: string) => {
+    try {
+      await confirmEmail(registeredEmail, code);
+      
+      // Sign in the user after successful verification
+      const user = await signIn(formData.email, formData.password);
       
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -62,9 +105,9 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          uid: user.uid,
+          uid: user.username,
           email: user.email,
-          displayName: user.displayName,
+          displayName: formData.name,
           role: formData.role,
         }),
       });
@@ -75,13 +118,30 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
 
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Registration failed');
-    } finally {
-      setLoading(false);
+      throw new Error(err.message || 'Email verification failed');
     }
   };
 
-  // Always show the form, but handle Firebase errors gracefully in the submission
+  const handleResendCode = async () => {
+    try {
+      await signUp(formData.email, formData.password, formData.name, formData.role);
+    } catch (err: any) {
+      throw new Error(err.message || 'Failed to resend verification code');
+    }
+  };
+
+  if (showEmailVerification) {
+    return (
+      <div className="w-full max-w-md mx-auto">
+        <EmailVerificationForm
+          email={registeredEmail}
+          onVerify={handleEmailVerification}
+          onResendCode={handleResendCode}
+          isLoading={loading}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md mx-auto">
