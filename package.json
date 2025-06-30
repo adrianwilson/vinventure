@@ -22,7 +22,7 @@
     "infrastructure:deploy": "nx run infrastructure:deploy",
     "infrastructure:synth": "nx run infrastructure:synth",
     "infrastructure:diff": "nx run infrastructure:diff",
-    "deploy": "npm run build && nx deploy web",
+    "deploy": "pnpm run build && nx deploy web",
     "graph": "nx graph",
     "affected:test": "nx affected:test",
     "affected:build": "nx affected:build",
@@ -49,7 +49,4 @@
     "typescript": "~5.8.2",
     "typescript-eslint": "^8.29.0"
   },
-  "workspaces": [
-    "apps/*"
-  ]
 }
