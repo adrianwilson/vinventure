@@ -22,7 +22,7 @@
     "deploy": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cdk deploy --require-approval never",
+        "command": "npx cdk deploy VinventureLambdaStack --require-approval never --context environment=dev",
         "cwd": "apps/infrastructure"
       }
     },

@@ -106,6 +106,17 @@
         "command": "tsc --noEmit",
         "cwd": "apps/web"
       }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "commands": [
+          "nx deploy infrastructure",
+          "echo '✅ Web application deployed successfully!'"
+        ],
+        "parallel": false
+      }
     }
   }
 }
