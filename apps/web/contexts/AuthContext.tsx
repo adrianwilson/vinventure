@@ -2,8 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { CognitoAuthService, CognitoUser } from '../lib/cognito';
-import { AuthService, AuthUser } from '../lib/auth';
-import { isFirebaseAvailable } from '../lib/firebase';
 
 interface AuthContextType {
   user: CognitoUser | null;

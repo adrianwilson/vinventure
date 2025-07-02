@@ -42,23 +42,7 @@ export class VinventureLambdaStack extends cdk.Stack {
       ],
     });
 
-    // Secrets for sensitive configuration
-    const firebaseSecret = new secretsmanager.Secret(this, 'FirebaseSecret', {
-      description: 'Firebase configuration for VinVenture',
-      generateSecretString: {
-        secretStringTemplate: JSON.stringify({
-          projectId: 'your-firebase-project',
-          clientEmail: 'firebase-adminsdk@your-project.iam.gserviceaccount.com',
-          apiKey: 'your-firebase-api-key',
-          authDomain: 'your-project.firebaseapp.com',
-          storageBucket: 'your-project.appspot.com',
-          messagingSenderId: 'your-sender-id',
-          appId: 'your-app-id',
-        }),
-        generateStringKey: 'privateKey',
-        excludeCharacters: '"\\/',
-      },
-    });
+    // Authentication now handled by AWS Cognito (no secrets needed)
 
     // Aurora Serverless v2 PostgreSQL Database (scales to zero when dormant)
     const databaseSecret = new secretsmanager.Secret(this, 'DatabaseSecret', {

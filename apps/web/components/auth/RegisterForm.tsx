@@ -66,15 +66,15 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
         // Auto sign in after successful registration
         const user = await signIn(formData.email, formData.password);
         
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            uid: user.username,
+            cognitoUid: user.username,
             email: user.email,
-            displayName: formData.name,
+            name: formData.name,
             role: formData.role,
           }),
         });
@@ -99,15 +99,15 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
       // Sign in the user after successful verification
       const user = await signIn(formData.email, formData.password);
       
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          uid: user.username,
+          cognitoUid: user.username,
           email: user.email,
-          displayName: formData.name,
+          name: formData.name,
           role: formData.role,
         }),
       });
