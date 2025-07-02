@@ -12,6 +12,7 @@ interface AuthContextType {
   confirmEmail: (email: string, code: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,14 +40,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const accessToken = localStorage.getItem('cognito_access_token');
         if (accessToken) {
-          const currentUser = await CognitoAuthService.getCurrentUser(accessToken);
-          setUser(currentUser);
+          try {
+            const currentUser = await CognitoAuthService.getCurrentUser(accessToken);
+            setUser(currentUser);
+          } catch (error) {
+            // Try to refresh tokens if access token is expired
+            console.log('Access token expired, attempting refresh...');
+            await refreshSession();
+          }
         }
       } catch (error) {
         console.error('Session check failed:', error);
-        localStorage.removeItem('cognito_access_token');
-        localStorage.removeItem('cognito_id_token');
-        localStorage.removeItem('cognito_refresh_token');
+        clearTokens();
       } finally {
         setLoading(false);
       }
@@ -54,6 +59,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     checkSession();
   }, []);
+
+  const clearTokens = () => {
+    localStorage.removeItem('cognito_access_token');
+    localStorage.removeItem('cognito_id_token');
+    localStorage.removeItem('cognito_refresh_token');
+  };
 
   const signIn = async (email: string, password: string): Promise<CognitoUser> => {
     const user = await CognitoAuthService.signIn({ email, password });
@@ -87,15 +98,37 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
     
     // Clear local storage
-    localStorage.removeItem('cognito_access_token');
-    localStorage.removeItem('cognito_id_token');
-    localStorage.removeItem('cognito_refresh_token');
+    clearTokens();
     
     setUser(null);
   };
 
   const resetPassword = async (email: string): Promise<void> => {
     return CognitoAuthService.forgotPassword(email);
+  };
+
+  const refreshSession = async (): Promise<void> => {
+    const refreshToken = localStorage.getItem('cognito_refresh_token');
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    try {
+      const tokens = await CognitoAuthService.refreshTokens(refreshToken);
+      
+      // Update stored tokens
+      localStorage.setItem('cognito_access_token', tokens.accessToken);
+      localStorage.setItem('cognito_id_token', tokens.idToken);
+      
+      // Get updated user info
+      const currentUser = await CognitoAuthService.getCurrentUser(tokens.accessToken);
+      setUser(currentUser);
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      clearTokens();
+      setUser(null);
+      throw error;
+    }
   };
 
   const value: AuthContextType = {
@@ -107,6 +140,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     confirmEmail,
     signOut,
     resetPassword,
+    refreshSession,
   };
 
   return (

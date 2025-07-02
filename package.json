@@ -1,5 +1,5 @@
 {
-  "name": "@./source",
+  "name": "vinventure",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -49,4 +49,8 @@
     "typescript": "~5.8.2",
     "typescript-eslint": "^8.29.0"
   },
+  "dependencies": {
+    "@playwright/test": "^1.53.2",
+    "@vitejs/plugin-react": "^4.6.0"
+  }
 }
