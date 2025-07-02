@@ -7,9 +7,10 @@ import { useRouter } from 'next/navigation';
 interface LoginFormProps {
   onToggleMode?: () => void;
   onForgotPassword?: () => void;
+  onVerifyEmail?: () => void;
 }
 
-export default function LoginForm({ onToggleMode, onForgotPassword }: LoginFormProps) {
+export default function LoginForm({ onToggleMode, onForgotPassword, onVerifyEmail }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -23,9 +24,9 @@ export default function LoginForm({ onToggleMode, onForgotPassword }: LoginFormP
     setError('');
     setLoading(true);
 
-    // Check if Firebase is available at runtime
+    // Check if Cognito is available at runtime
     if (!isAvailable) {
-      setError('Authentication service is not configured. Please set up Firebase credentials.');
+      setError('Authentication service is not configured. Please set up Cognito credentials.');
       setLoading(false);
       return;
     }
@@ -112,6 +113,17 @@ export default function LoginForm({ onToggleMode, onForgotPassword }: LoginFormP
               </button>
             </p>
           )}
+          
+          <p className="text-xs text-gray-500 mt-2">
+            Need to verify your email?{' '}
+            <button
+              type="button"
+              onClick={() => window.location.href = '/auth/verify'}
+              className="text-purple-600 hover:text-purple-500 font-medium"
+            >
+              Enter verification code
+            </button>
+          </p>
         </div>
       </form>
     </div>

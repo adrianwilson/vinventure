@@ -8,6 +8,9 @@ import {
   ConfirmForgotPasswordCommand,
   GetUserCommand,
   GlobalSignOutCommand,
+  AdminConfirmSignUpCommand,
+  AdminGetUserCommand,
+  ResendConfirmationCodeCommand,
   AuthFlowType,
 } from '@aws-sdk/client-cognito-identity-provider';
 
@@ -267,6 +270,112 @@ export class CognitoAuthService {
       };
     } catch (error) {
       return null;
+    }
+  }
+
+  static async refreshTokens(refreshToken: string): Promise<{
+    accessToken: string;
+    idToken: string;
+  }> {
+    if (!this.isConfigured()) {
+      throw new Error('Cognito is not configured. Please set up Cognito credentials.');
+    }
+
+    const client = this.getClient();
+
+    try {
+      const command = new InitiateAuthCommand({
+        ClientId: this.config.clientId,
+        AuthFlow: AuthFlowType.REFRESH_TOKEN_AUTH,
+        AuthParameters: {
+          REFRESH_TOKEN: refreshToken,
+        },
+      });
+
+      const response = await client.send(command);
+
+      if (!response.AuthenticationResult) {
+        throw new Error('Token refresh failed');
+      }
+
+      const tokens = response.AuthenticationResult;
+
+      return {
+        accessToken: tokens.AccessToken || '',
+        idToken: tokens.IdToken || '',
+      };
+    } catch (error: any) {
+      throw new Error(error.message || 'Token refresh failed');
+    }
+  }
+
+  static async resendConfirmationCode(email: string): Promise<void> {
+    if (!this.isConfigured()) {
+      throw new Error('Cognito is not configured. Please set up Cognito credentials.');
+    }
+
+    const client = this.getClient();
+
+    try {
+      const command = new ResendConfirmationCodeCommand({
+        ClientId: this.config.clientId,
+        Username: email,
+      });
+
+      await client.send(command);
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to resend confirmation code');
+    }
+  }
+
+  static async adminConfirmSignUp(email: string): Promise<void> {
+    if (!this.isConfigured()) {
+      throw new Error('Cognito is not configured. Please set up Cognito credentials.');
+    }
+
+    const client = this.getClient();
+
+    try {
+      const command = new AdminConfirmSignUpCommand({
+        UserPoolId: this.config.userPoolId,
+        Username: email,
+      });
+
+      await client.send(command);
+    } catch (error: any) {
+      throw new Error(error.message || 'Admin confirmation failed');
+    }
+  }
+
+  static async adminGetUser(email: string): Promise<any> {
+    if (!this.isConfigured()) {
+      throw new Error('Cognito is not configured. Please set up Cognito credentials.');
+    }
+
+    const client = this.getClient();
+
+    try {
+      const command = new AdminGetUserCommand({
+        UserPoolId: this.config.userPoolId,
+        Username: email,
+      });
+
+      const response = await client.send(command);
+      return {
+        username: response.Username,
+        userStatus: response.UserStatus,
+        enabled: response.Enabled,
+        userCreateDate: response.UserCreateDate,
+        userLastModifiedDate: response.UserLastModifiedDate,
+        attributes: response.UserAttributes?.reduce((acc, attr) => {
+          if (attr.Name && attr.Value) {
+            acc[attr.Name] = attr.Value;
+          }
+          return acc;
+        }, {} as Record<string, string>),
+      };
+    } catch (error: any) {
+      throw new Error(error.message || 'Failed to get user information');
     }
   }
 

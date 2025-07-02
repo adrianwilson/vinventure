@@ -43,7 +43,7 @@ enum ExperienceType {
 
 model User {
   id          String   @id @default(cuid())
-  firebaseUid String   @unique
+  cognitoUid  String   @unique
   email       String   @unique
   name        String?
   phone       String?

@@ -5,7 +5,7 @@ import LoginForm from '../../components/auth/LoginForm';
 import RegisterForm from '../../components/auth/RegisterForm';
 import ForgotPasswordForm from '../../components/auth/ForgotPasswordForm';
 
-type AuthMode = 'login' | 'register' | 'forgot-password';
+type AuthMode = 'login' | 'register' | 'forgot-password' | 'verify';
 
 export default function AuthPage() {
   const [mode, setMode] = useState<AuthMode>('login');

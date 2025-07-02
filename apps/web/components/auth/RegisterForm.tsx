@@ -37,9 +37,9 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
     setError('');
     setLoading(true);
 
-    // Check if Firebase is available at runtime
+    // Check if Cognito is available at runtime
     if (!isAvailable) {
-      setError('Authentication service is not configured. Please set up Firebase credentials.');
+      setError('Authentication service is not configured. Please set up Cognito credentials.');
       setLoading(false);
       return;
     }
@@ -62,6 +62,7 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
       if (result.confirmationRequired) {
         setRegisteredEmail(formData.email);
         setShowEmailVerification(true);
+        setSuccess('Registration successful! Please check your email for a verification code.');
       } else {
         // Auto sign in after successful registration
         const user = await signIn(formData.email, formData.password);
