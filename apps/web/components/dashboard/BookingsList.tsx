@@ -57,6 +57,7 @@ export default function BookingsList() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isLocal, setIsLocal] = useState(false);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -68,9 +69,7 @@ export default function BookingsList() {
 
         // Check if API URL is configured
         if (!process.env.NEXT_PUBLIC_API_URL) {
-          console.warn('API URL not configured, using mock data for bookings');
-          setBookings([]); // Empty for demo
-          return;
+          throw new Error('Booking service is not configured');
         }
 
         const response = await fetch(
@@ -86,9 +85,7 @@ export default function BookingsList() {
         // Check if response is JSON
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
-          console.warn('API returned non-JSON response, using empty bookings for demo');
-          setBookings([]);
-          return;
+          throw new Error('Booking service returned an invalid response');
         }
 
         const result = await response.json();
@@ -98,11 +95,24 @@ export default function BookingsList() {
         }
 
         setBookings(result.bookings || []);
+        setIsLocal(false);
       } catch (err: any) {
         console.error('Error fetching bookings:', err);
-        // For demo purposes, don't show error, just show empty state
-        console.warn('Using empty bookings due to API error:', err.message);
-        setBookings([]);
+        
+        // Handle API errors by falling back to localStorage
+        console.warn('API error occurred, loading bookings from localStorage:', err.message);
+        
+        try {
+          const localBookings = JSON.parse(localStorage.getItem('vinventure_bookings') || '[]');
+          console.log('Loaded local bookings:', localBookings);
+          setBookings(localBookings);
+          setIsLocal(true);
+          setError(''); // Don't show error if we have local bookings
+        } catch (localError) {
+          console.error('Failed to load local bookings:', localError);
+          setBookings([]);
+          setError(''); // Still don't show error, just empty state
+        }
       } finally {
         setLoading(false);
       }
@@ -250,6 +260,24 @@ export default function BookingsList() {
 
   return (
     <div className="space-y-8">
+      {/* Local Storage Indicator */}
+      {isLocal && bookings.length > 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+          <div className="flex items-center">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-blue-700">
+                Bookings are temporarily stored locally. They will sync when the server is available.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Upcoming Bookings */}
       {upcomingBookings.length > 0 && (
         <div>

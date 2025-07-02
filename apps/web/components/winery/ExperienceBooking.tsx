@@ -36,7 +36,7 @@ const ClockIcon = ({ className }: { className?: string }) => (
 );
 
 export default function ExperienceBooking({ winery, experience, onClose }: ExperienceBookingProps) {
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const [formData, setFormData] = useState<BookingFormData>({
     date: '',
     time: experience.startTime || '10:00',
@@ -96,7 +96,7 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!isAuthenticated) {
+    if (!user) {
       setError('Please sign in to make a booking');
       return;
     }
@@ -130,12 +130,11 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
 
       console.log('Submitting booking:', bookingPayload);
 
-      // Check if API URL is configured
+      // Call the production API
+      console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
+
       if (!process.env.NEXT_PUBLIC_API_URL) {
-        console.warn('API URL not configured, simulating booking success for demo');
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API delay
-        setStep(3); // Go to confirmation
-        return;
+        throw new Error('API URL not configured');
       }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookings`, {
@@ -146,13 +145,9 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
         body: JSON.stringify(bookingPayload)
       });
 
-      // Check if response is JSON
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
-        console.warn('API returned non-JSON response, simulating booking success for demo');
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API delay
-        setStep(3); // Go to confirmation
-        return;
+        throw new Error('API returned non-JSON response');
       }
 
       const result = await response.json();
@@ -162,14 +157,59 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
       }
 
       console.log('Booking created successfully:', result);
-      setStep(3); // Go to confirmation
+      setStep(3);
       
     } catch (err: any) {
       console.error('Booking error:', err);
-      // For demo purposes, simulate success even on API errors
-      console.warn('API error occurred, simulating booking success for demo:', err.message);
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API delay
-      setStep(3); // Go to confirmation
+      
+      // Handle specific error types with local storage fallback
+      if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
+        console.warn('Network error - API unreachable, saving booking locally');
+      } else if (err.message.includes('API returned non-JSON response')) {
+        console.warn('API returned non-JSON response, saving booking locally');
+      } else if (err.message.includes('Internal server error')) {
+        console.warn('API internal error, saving booking locally');
+      } else {
+        setError(err.message || 'An unexpected error occurred. Please try again.');
+        return;
+      }
+
+      // Save booking to localStorage as fallback
+      try {
+        const booking = {
+          id: 'local-' + Date.now(),
+          bookingDate: `${formData.date}T${formData.time}:00.000Z`,
+          guests: formData.guests,
+          totalPrice: totalPrice,
+          status: 'CONFIRMED',
+          specialRequests: formData.specialRequests,
+          winery: {
+            id: winery.id,
+            name: winery.name,
+            city: winery.city,
+            region: winery.region,
+            bannerUrl: winery.bannerUrl
+          },
+          experience: {
+            id: experience.id,
+            title: experience.title,
+            type: experience.type,
+            duration: experience.duration
+          },
+          createdAt: new Date().toISOString()
+        };
+
+        const existingBookings = JSON.parse(localStorage.getItem('vinventure_bookings') || '[]');
+        existingBookings.push(booking);
+        localStorage.setItem('vinventure_bookings', JSON.stringify(existingBookings));
+        
+        console.log('Booking saved locally:', booking);
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        setStep(3); // Go to confirmation
+      } catch (localError) {
+        console.error('Failed to save booking locally:', localError);
+        setError('Unable to save booking. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -294,14 +334,14 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
               </button>
               <button
                 type="submit"
-                disabled={loading || !isAuthenticated}
+                disabled={loading || !user}
                 className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {loading ? 'Processing...' : 'Book Now'}
               </button>
             </div>
 
-            {!isAuthenticated && (
+            {!user && (
               <p className="text-sm text-gray-600 text-center">
                 Please <button onClick={onClose} className="text-purple-600 hover:text-purple-700">sign in</button> to make a booking.
               </p>

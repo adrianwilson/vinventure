@@ -1,7 +1,9 @@
 import { mockWineries } from '../../../lib/mock-data';
 import WineryPageClient from './WineryPageClient';
 
-// Generate static params for all wineries at build time
+// With static export, we need all winery IDs at build time
+// Adding new wineries requires rebuilding unless we change the architecture
+
 export async function generateStaticParams() {
   // For static export, we need to generate all possible [id] values
   return mockWineries.map((winery) => ({
