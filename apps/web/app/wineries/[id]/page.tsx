@@ -12,12 +12,13 @@ export async function generateStaticParams() {
 }
 
 interface WineryPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function WineryPage({ params }: WineryPageProps) {
+export default async function WineryPage({ params }: WineryPageProps) {
   // This is a server component that just passes the id to the client component
-  return <WineryPageClient wineryId={params.id} />;
+  const { id } = await params;
+  return <WineryPageClient wineryId={id} />;
 }

@@ -130,85 +130,107 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
 
       console.log('Submitting booking:', bookingPayload);
 
-      // Call the production API
+      // Try to call the production API
       console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
 
       if (!process.env.NEXT_PUBLIC_API_URL) {
-        throw new Error('API URL not configured');
+        throw new Error('API_NOT_CONFIGURED');
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookings`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bookingPayload)
-      });
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookings`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(bookingPayload)
+        });
 
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('API returned non-JSON response');
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('API_NON_JSON');
+        }
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(`API_ERROR: ${result.message || result.error || 'Failed to create booking'}`);
+        }
+
+        console.log('Booking created successfully via API:', result);
+        setStep(3);
+        return; // Success, don't fall back to localStorage
+        
+      } catch (apiError: any) {
+        // API failed, throw to trigger localStorage fallback
+        if (apiError.name === 'TypeError' || apiError.message.includes('Failed to fetch')) {
+          throw new Error('NETWORK_ERROR');
+        } else if (apiError.message.includes('API_NON_JSON')) {
+          throw new Error('API_NON_JSON');
+        } else if (apiError.message.includes('API_ERROR')) {
+          throw new Error('API_ERROR');
+        } else {
+          throw apiError;
+        }
       }
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || result.error || 'Failed to create booking');
-      }
-
-      console.log('Booking created successfully:', result);
-      setStep(3);
       
     } catch (err: any) {
-      console.error('Booking error:', err);
-      
       // Handle specific error types with local storage fallback
-      if (err.name === 'TypeError' && err.message.includes('Failed to fetch')) {
-        console.warn('Network error - API unreachable, saving booking locally');
-      } else if (err.message.includes('API returned non-JSON response')) {
-        console.warn('API returned non-JSON response, saving booking locally');
-      } else if (err.message.includes('Internal server error')) {
-        console.warn('API internal error, saving booking locally');
+      if (err.message === 'NETWORK_ERROR') {
+        console.log('Network error - API unreachable, saving booking locally');
+      } else if (err.message === 'API_NON_JSON') {
+        console.log('API returned non-JSON response, saving booking locally');
+      } else if (err.message === 'API_ERROR') {
+        console.log('API error occurred, saving booking locally');
+      } else if (err.message === 'API_NOT_CONFIGURED') {
+        console.log('API not configured, saving booking locally');
       } else {
+        console.error('Unexpected booking error:', err);
         setError(err.message || 'An unexpected error occurred. Please try again.');
         return;
       }
 
-      // Save booking to localStorage as fallback
-      try {
-        const booking = {
-          id: 'local-' + Date.now(),
-          bookingDate: `${formData.date}T${formData.time}:00.000Z`,
-          guests: formData.guests,
-          totalPrice: totalPrice,
-          status: 'CONFIRMED',
-          specialRequests: formData.specialRequests,
-          winery: {
-            id: winery.id,
-            name: winery.name,
-            city: winery.city,
-            region: winery.region,
-            bannerUrl: winery.bannerUrl
-          },
-          experience: {
-            id: experience.id,
-            title: experience.title,
-            type: experience.type,
-            duration: experience.duration
-          },
-          createdAt: new Date().toISOString()
-        };
+      // Save booking to localStorage as fallback (browser only)
+      if (typeof window !== 'undefined') {
+        try {
+          const booking = {
+            id: 'local-' + Date.now(),
+            bookingDate: `${formData.date}T${formData.time}:00.000Z`,
+            guests: formData.guests,
+            totalPrice: totalPrice,
+            status: 'CONFIRMED',
+            specialRequests: formData.specialRequests,
+            winery: {
+              id: winery.id,
+              name: winery.name,
+              city: winery.city,
+              region: winery.region,
+              bannerUrl: winery.bannerUrl
+            },
+            experience: {
+              id: experience.id,
+              title: experience.title,
+              type: experience.type,
+              duration: experience.duration
+            },
+            createdAt: new Date().toISOString()
+          };
 
-        const existingBookings = JSON.parse(localStorage.getItem('vinventure_bookings') || '[]');
-        existingBookings.push(booking);
-        localStorage.setItem('vinventure_bookings', JSON.stringify(existingBookings));
-        
-        console.log('Booking saved locally:', booking);
+          const existingBookings = JSON.parse(localStorage.getItem('vinventure_bookings') || '[]');
+          existingBookings.push(booking);
+          localStorage.setItem('vinventure_bookings', JSON.stringify(existingBookings));
+          
+          console.log('Booking saved locally:', booking);
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          setStep(3); // Go to confirmation
+        } catch (localError) {
+          console.error('Failed to save booking locally:', localError);
+          setError('Unable to save booking. Please try again.');
+        }
+      } else {
+        // Server-side fallback
         await new Promise(resolve => setTimeout(resolve, 1500));
-        setStep(3); // Go to confirmation
-      } catch (localError) {
-        console.error('Failed to save booking locally:', localError);
-        setError('Unable to save booking. Please try again.');
+        setStep(3);
       }
     } finally {
       setLoading(false);

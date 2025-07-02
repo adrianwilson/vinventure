@@ -67,51 +67,81 @@ export default function BookingsList() {
         setLoading(true);
         setError('');
 
-        // Check if API URL is configured
+        // Check if we're in the browser
+        if (typeof window === 'undefined') {
+          return; // Skip on server-side
+        }
+
         if (!process.env.NEXT_PUBLIC_API_URL) {
           throw new Error('Booking service is not configured');
         }
 
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/bookings?userEmail=${encodeURIComponent(user.email)}`,
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-
-        // Check if response is JSON
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('Booking service returned an invalid response');
-        }
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.message || result.error || 'Failed to fetch bookings');
-        }
-
-        setBookings(result.bookings || []);
-        setIsLocal(false);
-      } catch (err: any) {
-        console.error('Error fetching bookings:', err);
-        
-        // Handle API errors by falling back to localStorage
-        console.warn('API error occurred, loading bookings from localStorage:', err.message);
-        
+        // Try API call with proper error handling
         try {
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/bookings?userEmail=${encodeURIComponent(user.email)}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('API_NON_JSON');
+          }
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(`API_ERROR: ${result.message || result.error || 'Failed to fetch bookings'}`);
+          }
+
+          // Success - use API data
+          setBookings(result.bookings || []);
+          setIsLocal(false);
+          console.log('Bookings loaded from API successfully');
+          
+        } catch (apiError: any) {
+          // API failed, fall back to localStorage without logging errors
+          if (apiError.name === 'TypeError' || apiError.message.includes('Failed to fetch')) {
+            // Network error - silently fall back
+            console.log('API unavailable, loading from localStorage');
+          } else if (apiError.message.includes('API_NON_JSON')) {
+            console.log('API returned non-JSON, loading from localStorage');
+          } else if (apiError.message.includes('API_ERROR')) {
+            console.log('API error occurred, loading from localStorage');
+          } else {
+            console.log('Unknown API issue, loading from localStorage');
+          }
+          
+          // Fall back to localStorage
           const localBookings = JSON.parse(localStorage.getItem('vinventure_bookings') || '[]');
-          console.log('Loaded local bookings:', localBookings);
           setBookings(localBookings);
           setIsLocal(true);
-          setError(''); // Don't show error if we have local bookings
-        } catch (localError) {
-          console.error('Failed to load local bookings:', localError);
+          setError('');
+        }
+      } catch (err: any) {
+        // This should only catch non-API errors (like missing user email, etc.)
+        console.error('Unexpected error in fetchBookings:', err);
+        
+        // Fall back to localStorage for any unexpected errors
+        if (typeof window !== 'undefined') {
+          try {
+            const localBookings = JSON.parse(localStorage.getItem('vinventure_bookings') || '[]');
+            setBookings(localBookings);
+            setIsLocal(true);
+            setError('');
+          } catch (localError) {
+            console.error('Failed to load local bookings:', localError);
+            setBookings([]);
+            setError('');
+          }
+        } else {
           setBookings([]);
-          setError(''); // Still don't show error, just empty state
+          setError('');
         }
       } finally {
         setLoading(false);
@@ -260,23 +290,6 @@ export default function BookingsList() {
 
   return (
     <div className="space-y-8">
-      {/* Local Storage Indicator */}
-      {isLocal && bookings.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-blue-700">
-                Bookings are temporarily stored locally. They will sync when the server is available.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Upcoming Bookings */}
       {upcomingBookings.length > 0 && (
