@@ -24,10 +24,10 @@ export class VinventureLambdaStack extends cdk.Stack {
     const environment = this.node.tryGetContext('environment') || 'dev';
     const isProduction = environment === 'production';
 
-    // VPC for database (Lambda functions can be VPC-less for better performance)
+    // VPC for database (Lambda functions can use Data API for serverless access)
     const vpc = new ec2.Vpc(this, 'VinventureVpc', {
       maxAzs: 2,
-      natGateways: 1, // Lambda doesn't need NAT gateways for most use cases
+      natGateways: 1,
       subnetConfiguration: [
         {
           cidrMask: 24,
@@ -54,7 +54,7 @@ export class VinventureLambdaStack extends cdk.Stack {
       },
     });
 
-    // Aurora Serverless v2 Cluster
+    // Aurora Serverless v2 Cluster with Data API enabled
     const database = new rds.DatabaseCluster(this, 'VinventureDatabase', {
       engine: rds.DatabaseClusterEngine.auroraPostgres({
         version: rds.AuroraPostgresEngineVersion.VER_17_4,
@@ -77,6 +77,8 @@ export class VinventureLambdaStack extends cdk.Stack {
       serverlessV2MinCapacity: 0,
       serverlessV2MaxCapacity: isProduction ? 16 : 4,
       monitoringInterval: cdk.Duration.seconds(60),
+      // Enable Data API for serverless access
+      enableDataApi: true,
       // Aurora Serverless v2 scales down to minimum capacity when idle
     });
 
@@ -244,6 +246,20 @@ export class VinventureLambdaStack extends cdk.Stack {
 
     // Grant permissions
     databaseSecret.grantRead(lambdaRole);
+    
+    // Grant Lambda access to Aurora Data API
+    lambdaRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'rds-data:ExecuteStatement',
+        'rds-data:BatchExecuteStatement',
+        'rds-data:BeginTransaction',
+        'rds-data:CommitTransaction',
+        'rds-data:RollbackTransaction'
+      ],
+      resources: [database.clusterArn]
+    }));
+    
     // Remove Firebase permissions as we're switching to Cognito
     // mediaBucket.grantReadWrite(lambdaRole);
 
@@ -252,6 +268,8 @@ export class VinventureLambdaStack extends cdk.Stack {
       NODE_ENV: isProduction ? 'production' : 'development',
       ENVIRONMENT: environment,
       DATABASE_SECRET_ARN: databaseSecret.secretArn,
+      DATABASE_CLUSTER_ARN: database.clusterArn,
+      DATABASE_NAME: 'vinventure',
       // AWS Cognito configuration
       COGNITO_USER_POOL_ID: userPool.userPoolId,
       COGNITO_USER_POOL_CLIENT_ID: userPoolClient.userPoolClientId,
@@ -269,7 +287,7 @@ export class VinventureLambdaStack extends cdk.Stack {
       memorySize: isProduction ? 1024 : 512,
       environment: lambdaEnvironment,
       role: lambdaRole,
-      // No VPC for better cold start performance
+      // Use Data API for serverless Aurora access (no VPC needed)
       vpc: undefined,
     });
 
