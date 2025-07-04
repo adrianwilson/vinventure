@@ -6,6 +6,7 @@ import WineryFiltersComponent from '../../components/search/WineryFilters';
 import WineryGrid from '../../components/winery/WineryGrid';
 import { WineryFilters, WinerySearchResponse } from '@vinventure/types/types/winery';
 import { searchWineries } from '../../lib/mock-data';
+import { useFavorites } from '../../contexts/FavoritesContext';
 
 const initialFilters: WineryFilters = {
   search: '',
@@ -16,6 +17,7 @@ const initialFilters: WineryFilters = {
 };
 
 function DiscoverContent() {
+  const { favoriteWineryIds, toggleFavorite } = useFavorites();
 
   // State
   const [filters, setFilters] = useState<WineryFilters>(initialFilters);
@@ -153,6 +155,9 @@ function DiscoverContent() {
           <WineryGrid
             wineries={data?.wineries || []}
             loading={loading}
+            showFavorites={false}
+            favoriteWineryIds={favoriteWineryIds}
+            onToggleFavorite={toggleFavorite}
           />
         </div>
 

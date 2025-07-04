@@ -1,5 +1,6 @@
 import './global.css';
 import { AuthProvider } from '../contexts/AuthContext';
+import { FavoritesProvider } from '../contexts/FavoritesContext';
 
 export const metadata = {
   title: 'VinVenture - Discover Unique Wine Experiences',
@@ -15,7 +16,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <AuthProvider>
-          {children}
+          <FavoritesProvider>
+            {children}
+          </FavoritesProvider>
         </AuthProvider>
       </body>
     </html>

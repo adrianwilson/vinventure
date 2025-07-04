@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Navigation from '../../components/ui/Navigation';
 import BookingsList from '../../components/dashboard/BookingsList';
+import FavoritesList from '../../components/favorites/FavoritesList';
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -53,11 +54,14 @@ export default function DashboardPage() {
               <div className="text-purple-600 font-medium">View Bookings →</div>
             </button>
             
-            <div className="bg-white p-6 rounded-lg shadow-md opacity-75">
+            <button 
+              onClick={() => setActiveTab('favorites')}
+              className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow cursor-pointer text-left"
+            >
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Favorites</h3>
               <p className="text-gray-600 mb-4">Your saved wineries and experiences</p>
-              <div className="text-gray-400 font-medium">Coming Soon</div>
-            </div>
+              <div className="text-purple-600 font-medium">View Favorites →</div>
+            </button>
           </div>
         );
       
@@ -65,12 +69,7 @@ export default function DashboardPage() {
         return <BookingsList />;
       
       case 'favorites':
-        return (
-          <div className="text-center py-12">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Favorites Feature</h3>
-            <p className="text-gray-600">This feature is coming soon!</p>
-          </div>
-        );
+        return <FavoritesList />;
       
       default:
         return null;

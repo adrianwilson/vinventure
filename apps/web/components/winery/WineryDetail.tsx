@@ -6,6 +6,7 @@ import { Winery, Experience, EXPERIENCE_TYPE_LABELS } from '@vinventure/types/ty
 import ExperienceBooking from './ExperienceBooking';
 import ReviewsSection from '../reviews/ReviewsSection';
 import FavoriteButton from '../favorites/FavoriteButton';
+import { useFavorites } from '../../contexts/FavoritesContext';
 
 interface WineryDetailProps {
   winery: Winery;
@@ -50,9 +51,9 @@ const GlobeIcon = ({ className }: { className?: string }) => (
 );
 
 export default function WineryDetail({ winery }: WineryDetailProps) {
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [selectedExperience, setSelectedExperience] = useState<Experience | null>(null);
   const [showBooking, setShowBooking] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false); // In real app, would come from API
 
   const handleBookExperience = (experience: Experience) => {
     setSelectedExperience(experience);
@@ -62,11 +63,6 @@ export default function WineryDetail({ winery }: WineryDetailProps) {
   const handleCloseBooking = () => {
     setShowBooking(false);
     setSelectedExperience(null);
-  };
-
-  const handleToggleFavorite = (wineryId: string, newFavoriteState: boolean) => {
-    setIsFavorite(newFavoriteState);
-    // In real app, would also sync with API/backend
   };
 
   return (
@@ -139,8 +135,8 @@ export default function WineryDetail({ winery }: WineryDetailProps) {
                   )}
                   <FavoriteButton
                     wineryId={winery.id}
-                    isFavorite={isFavorite}
-                    onToggle={handleToggleFavorite}
+                    isFavorite={isFavorite(winery.id)}
+                    onToggleFavorite={toggleFavorite}
                     size="lg"
                   />
                 </div>

@@ -4,9 +4,12 @@ import { useState, useEffect } from 'react';
 import { Winery } from '@vinventure/types/types/winery';
 import WineryMap from '../../components/map/WineryMap';
 import WineryCard from '../../components/winery/WineryCard';
+import Navigation from '../../components/ui/Navigation';
 import { mockWineries } from '../../lib/mock-data';
+import { useFavorites } from '../../contexts/FavoritesContext';
 
 export default function MapPage() {
+  const { favoriteWineryIds, toggleFavorite, isFavorite } = useFavorites();
   const [wineries, setWineries] = useState<Winery[]>([]);
   const [selectedWinery, setSelectedWinery] = useState<Winery | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,6 +54,8 @@ export default function MapPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Navigation currentPage="map" />
+      
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -121,7 +126,12 @@ export default function MapPage() {
                       }`}
                       onClick={() => handleWinerySelect(winery)}
                     >
-                      <WineryCard winery={winery} />
+                      <WineryCard 
+                        winery={winery} 
+                        showFavoriteButton={true}
+                        isFavorite={isFavorite(winery.id)}
+                        onToggleFavorite={toggleFavorite}
+                      />
                     </div>
                   ))
                 )}
@@ -142,7 +152,12 @@ export default function MapPage() {
             {selectedWinery && (
               <div className="absolute bottom-4 left-4 right-4 lg:left-auto lg:w-96 z-10">
                 <div className="bg-white rounded-lg shadow-lg p-1">
-                  <WineryCard winery={selectedWinery} />
+                  <WineryCard 
+                    winery={selectedWinery} 
+                    showFavoriteButton={true}
+                    isFavorite={isFavorite(selectedWinery.id)}
+                    onToggleFavorite={toggleFavorite}
+                  />
                   <div className="p-3 pt-0">
                     <button
                       onClick={() => setSelectedWinery(null)}

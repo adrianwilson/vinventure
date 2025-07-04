@@ -7,6 +7,7 @@ interface FavoriteButtonProps {
   wineryId: string;
   isFavorite: boolean;
   onToggle?: (wineryId: string, isFavorite: boolean) => void;
+  onToggleFavorite?: (wineryId: string) => void;
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'minimal';
 }
@@ -15,6 +16,7 @@ export default function FavoriteButton({
   wineryId, 
   isFavorite, 
   onToggle,
+  onToggleFavorite,
   size = 'md',
   variant = 'default'
 }: FavoriteButtonProps) {
@@ -55,6 +57,8 @@ export default function FavoriteButton({
       // Notify parent component
       if (onToggle) {
         onToggle(wineryId, newFavoriteState);
+      } else if (onToggleFavorite) {
+        onToggleFavorite(wineryId);
       }
       
     } catch (error) {
