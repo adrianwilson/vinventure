@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Winery, Experience } from '@vinventure/types/types/winery';
 import { useAuth } from '../../contexts/AuthContext';
+import StripePayment from '../payment/StripePayment';
 
 interface ExperienceBookingProps {
   winery: Winery;
@@ -45,7 +46,9 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [step, setStep] = useState(1); // 1: Details, 2: Payment (future), 3: Confirmation
+  const [step, setStep] = useState(1); // 1: Details, 2: Payment, 3: Confirmation
+  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
+  const [booking, setBooking] = useState<any>(null);
 
   // Generate available dates for the next 60 days
   const getAvailableDates = () => {
@@ -111,11 +114,18 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
       return;
     }
 
+    setError('');
+    // Move to payment step
+    setStep(2);
+  };
+
+  const handlePaymentSuccess = async (paymentId: string) => {
+    setPaymentIntentId(paymentId);
     setLoading(true);
     setError('');
 
     try {
-      // Call the booking API
+      // Call the booking API with payment information
       const bookingPayload = {
         wineryId: winery.id,
         experienceId: experience.id,
@@ -125,113 +135,93 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
         time: formData.time,
         guests: formData.guests,
         totalPrice: totalPrice,
-        specialRequests: formData.specialRequests
+        specialRequests: formData.specialRequests,
+        paymentIntentId: paymentId
       };
 
-      console.log('Submitting booking:', bookingPayload);
-
-      // Try to call the production API
-      console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
+      console.log('Submitting booking with payment:', bookingPayload);
 
       if (!process.env.NEXT_PUBLIC_API_URL) {
         throw new Error('API_NOT_CONFIGURED');
       }
 
-      try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookings`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(bookingPayload)
-        });
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingPayload)
+      });
 
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          throw new Error('API_NON_JSON');
-        }
+      const result = await response.json();
 
-        const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || result.error || 'Failed to create booking');
+      }
 
-        if (!response.ok) {
-          throw new Error(`API_ERROR: ${result.message || result.error || 'Failed to create booking'}`);
-        }
-
-        console.log('Booking created successfully via API:', result);
-        setStep(3);
-        return; // Success, don't fall back to localStorage
+      console.log('Booking created successfully with payment:', result);
+      setBooking(result.booking);
+      setStep(3);
         
-      } catch (apiError: any) {
-        // API failed, throw to trigger localStorage fallback
-        if (apiError.name === 'TypeError' || apiError.message.includes('Failed to fetch')) {
-          throw new Error('NETWORK_ERROR');
-        } else if (apiError.message.includes('API_NON_JSON')) {
-          throw new Error('API_NON_JSON');
-        } else if (apiError.message.includes('API_ERROR')) {
-          throw new Error('API_ERROR');
-        } else {
-          throw apiError;
-        }
-      }
-      
     } catch (err: any) {
-      // Handle specific error types with local storage fallback
-      if (err.message === 'NETWORK_ERROR') {
-        console.log('Network error - API unreachable, saving booking locally');
-      } else if (err.message === 'API_NON_JSON') {
-        console.log('API returned non-JSON response, saving booking locally');
-      } else if (err.message === 'API_ERROR') {
-        console.log('API error occurred, saving booking locally');
-      } else if (err.message === 'API_NOT_CONFIGURED') {
-        console.log('API not configured, saving booking locally');
-      } else {
-        console.error('Unexpected booking error:', err);
-        setError(err.message || 'An unexpected error occurred. Please try again.');
-        return;
+      console.error('Booking creation error:', err);
+      setError(err.message || 'Failed to create booking. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePaymentError = (error: string) => {
+    setError(`Payment failed: ${error}`);
+    setLoading(false);
+  };
+
+  const handleSkipPayment = async () => {
+    // For testing purposes - skip payment and create booking directly
+    setLoading(true);
+    setError('');
+
+    try {
+      const bookingPayload = {
+        wineryId: winery.id,
+        experienceId: experience.id,
+        userEmail: user?.email,
+        userCognitoId: user?.cognitoUid,
+        date: formData.date,
+        time: formData.time,
+        guests: formData.guests,
+        totalPrice: totalPrice,
+        specialRequests: formData.specialRequests,
+        // No payment intent for test mode
+      };
+
+      console.log('Submitting booking without payment (test mode):', bookingPayload);
+
+      if (!process.env.NEXT_PUBLIC_API_URL) {
+        throw new Error('API_NOT_CONFIGURED');
       }
 
-      // Save booking to localStorage as fallback (browser only)
-      if (typeof window !== 'undefined') {
-        try {
-          const booking = {
-            id: 'local-' + Date.now(),
-            bookingDate: `${formData.date}T${formData.time}:00.000Z`,
-            guests: formData.guests,
-            totalPrice: totalPrice,
-            status: 'CONFIRMED',
-            specialRequests: formData.specialRequests,
-            winery: {
-              id: winery.id,
-              name: winery.name,
-              city: winery.city,
-              region: winery.region,
-              bannerUrl: winery.bannerUrl
-            },
-            experience: {
-              id: experience.id,
-              title: experience.title,
-              type: experience.type,
-              duration: experience.duration
-            },
-            createdAt: new Date().toISOString()
-          };
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookings`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingPayload)
+      });
 
-          const existingBookings = JSON.parse(localStorage.getItem('vinventure_bookings') || '[]');
-          existingBookings.push(booking);
-          localStorage.setItem('vinventure_bookings', JSON.stringify(existingBookings));
-          
-          console.log('Booking saved locally:', booking);
-          await new Promise(resolve => setTimeout(resolve, 1500));
-          setStep(3); // Go to confirmation
-        } catch (localError) {
-          console.error('Failed to save booking locally:', localError);
-          setError('Unable to save booking. Please try again.');
-        }
-      } else {
-        // Server-side fallback
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setStep(3);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || result.error || 'Failed to create booking');
       }
+
+      console.log('Booking created successfully without payment:', result);
+      setBooking(result.booking);
+      setStep(3);
+        
+    } catch (err: any) {
+      console.error('Booking creation error:', err);
+      setError(err.message || 'Failed to create booking. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -359,7 +349,7 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
                 disabled={loading || !user}
                 className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                {loading ? 'Processing...' : 'Book Now'}
+                {loading ? 'Processing...' : 'Continue to Payment'}
               </button>
             </div>
 
@@ -369,6 +359,90 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
               </p>
             )}
           </form>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-6">
+            {/* Booking Summary */}
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h3 className="font-medium text-gray-900 mb-3">Booking Summary</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Experience:</span>
+                  <span>{experience.title}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Date:</span>
+                  <span>{formatDate(formData.date)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Time:</span>
+                  <span>{formData.time}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Guests:</span>
+                  <span>{formData.guests}</span>
+                </div>
+                <div className="flex justify-between font-medium text-lg border-t pt-2">
+                  <span>Total:</span>
+                  <span>${totalPrice}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Form */}
+            <div>
+              <h3 className="font-medium text-gray-900 mb-4">Payment Information</h3>
+              <StripePayment
+                amount={totalPrice}
+                onPaymentSuccess={handlePaymentSuccess}
+                onPaymentError={handlePaymentError}
+                loading={loading}
+              />
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+                {error}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  Back to Details
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+              
+              {/* Test Mode Button */}
+              <div className="border-t pt-3">
+                <p className="text-sm text-gray-600 mb-2">
+                  For testing: Skip payment and create booking directly
+                </p>
+                <button
+                  type="button"
+                  onClick={handleSkipPayment}
+                  disabled={loading}
+                  className="w-full px-4 py-2 border border-yellow-300 bg-yellow-50 text-yellow-800 rounded-md hover:bg-yellow-100 transition-colors disabled:opacity-50"
+                >
+                  {loading ? 'Creating Booking...' : 'Skip Payment (Test Mode)'}
+                </button>
+              </div>
+            </div>
+          </div>
         );
 
       case 3:

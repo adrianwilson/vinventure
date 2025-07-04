@@ -276,6 +276,15 @@ export class VinventureLambdaStack extends cdk.Stack {
       COGNITO_IDENTITY_POOL_ID: identityPool.ref,
       COGNITO_REGION: this.region,
       // MEDIA_BUCKET_NAME: mediaBucket.bucketName,
+      // Stripe configuration - Keys should be set via environment variables or AWS Secrets Manager
+      STRIPE_SECRET_KEY: isProduction 
+        ? process.env.STRIPE_LIVE_SECRET_KEY || 'STRIPE_LIVE_KEY_NOT_SET'
+        : process.env.STRIPE_TEST_SECRET_KEY || 'STRIPE_TEST_KEY_NOT_SET',
+      STRIPE_TEST_PUBLISHABLE_KEY: process.env.STRIPE_TEST_PUBLISHABLE_KEY || 'STRIPE_TEST_PK_NOT_SET',
+      STRIPE_LIVE_PUBLISHABLE_KEY: process.env.STRIPE_LIVE_PUBLISHABLE_KEY || 'STRIPE_LIVE_PK_NOT_SET',
+      STRIPE_WEBHOOK_SECRET: isProduction 
+        ? process.env.STRIPE_LIVE_WEBHOOK_SECRET || 'STRIPE_LIVE_WEBHOOK_NOT_SET'
+        : process.env.STRIPE_TEST_WEBHOOK_SECRET || 'STRIPE_TEST_WEBHOOK_NOT_SET',
     };
 
     // API Lambda Function (handles all API routes)
@@ -370,7 +379,7 @@ export class VinventureLambdaStack extends cdk.Stack {
 
     // Deploy HTML pages with no cache
     new s3deploy.BucketDeployment(this, 'VinventureHtmlPages', {
-      sources: [s3deploy.Source.asset('../../dist/apps/web/.next')],
+      sources: [s3deploy.Source.asset('../../apps/web/out')],
       destinationBucket: websiteBucket,
       cacheControl: [
         s3deploy.CacheControl.fromString('public, max-age=0, must-revalidate'), // HTML files
