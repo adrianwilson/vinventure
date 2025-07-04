@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Winery, Experience, EXPERIENCE_TYPE_LABELS } from '@vinventure/types/types/winery';
 import ExperienceBooking from './ExperienceBooking';
+import ReviewsSection from '../reviews/ReviewsSection';
+import FavoriteButton from '../favorites/FavoriteButton';
 
 interface WineryDetailProps {
   winery: Winery;
@@ -50,6 +52,7 @@ const GlobeIcon = ({ className }: { className?: string }) => (
 export default function WineryDetail({ winery }: WineryDetailProps) {
   const [selectedExperience, setSelectedExperience] = useState<Experience | null>(null);
   const [showBooking, setShowBooking] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false); // In real app, would come from API
 
   const handleBookExperience = (experience: Experience) => {
     setSelectedExperience(experience);
@@ -59,6 +62,11 @@ export default function WineryDetail({ winery }: WineryDetailProps) {
   const handleCloseBooking = () => {
     setShowBooking(false);
     setSelectedExperience(null);
+  };
+
+  const handleToggleFavorite = (wineryId: string, newFavoriteState: boolean) => {
+    setIsFavorite(newFavoriteState);
+    // In real app, would also sync with API/backend
   };
 
   return (
@@ -114,18 +122,28 @@ export default function WineryDetail({ winery }: WineryDetailProps) {
             {/* Title and Rating */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
               <div className="flex justify-between items-start mb-4">
-                <h1 className="text-3xl font-bold text-gray-900">{winery.name}</h1>
-                {winery.rating && (
-                  <div className="flex items-center gap-2">
-                    <StarIcon className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                    <span className="text-lg font-semibold">{winery.rating.toFixed(1)}</span>
-                    {winery._count?.reviews && (
-                      <span className="text-gray-600">
-                        ({winery._count.reviews} reviews)
-                      </span>
-                    )}
-                  </div>
-                )}
+                <div className="flex-1">
+                  <h1 className="text-3xl font-bold text-gray-900">{winery.name}</h1>
+                </div>
+                <div className="flex items-center gap-4">
+                  {winery.rating && (
+                    <div className="flex items-center gap-2">
+                      <StarIcon className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                      <span className="text-lg font-semibold">{winery.rating.toFixed(1)}</span>
+                      {winery._count?.reviews && (
+                        <span className="text-gray-600">
+                          ({winery._count.reviews} reviews)
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  <FavoriteButton
+                    wineryId={winery.id}
+                    isFavorite={isFavorite}
+                    onToggle={handleToggleFavorite}
+                    size="lg"
+                  />
+                </div>
               </div>
 
               {/* Location */}
@@ -153,7 +171,7 @@ export default function WineryDetail({ winery }: WineryDetailProps) {
             </div>
 
             {/* Experiences */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Experiences</h2>
               
               {winery.experiences && winery.experiences.length > 0 ? (
@@ -239,6 +257,15 @@ export default function WineryDetail({ winery }: WineryDetailProps) {
               ) : (
                 <p className="text-gray-600">No experiences available at this time.</p>
               )}
+            </div>
+
+            {/* Reviews Section */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <ReviewsSection 
+                wineryId={winery.id} 
+                wineryName={winery.name}
+                userBookings={[]}
+              />
             </div>
           </div>
 

@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
 interface NavigationProps {
-  currentPage?: 'home' | 'discover' | 'dashboard' | 'auth';
+  currentPage?: 'home' | 'discover' | 'map' | 'favorites' | 'dashboard' | 'auth';
 }
 
 export default function Navigation({ currentPage = 'home' }: NavigationProps) {
@@ -43,10 +43,31 @@ export default function Navigation({ currentPage = 'home' }: NavigationProps) {
             >
               Discover
             </Link>
+            
+            <Link 
+              href="/map" 
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                currentPage === 'map' 
+                  ? 'text-purple-600 bg-purple-50' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Map
+            </Link>
 
             {/* Authenticated Navigation */}
             {user ? (
               <>
+                <Link 
+                  href="/favorites" 
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    currentPage === 'favorites' 
+                      ? 'text-purple-600 bg-purple-50' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Favorites
+                </Link>
                 <Link 
                   href="/dashboard" 
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${

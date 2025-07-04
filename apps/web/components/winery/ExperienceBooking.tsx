@@ -153,10 +153,15 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
         body: JSON.stringify(bookingPayload)
       });
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+      }
 
       if (!response.ok) {
-        throw new Error(result.message || result.error || 'Failed to create booking');
+        throw new Error(result?.message || result?.error || `Server error: ${response.status}`);
       }
 
       console.log('Booking created successfully with payment:', result);
@@ -209,10 +214,15 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
         body: JSON.stringify(bookingPayload)
       });
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+      }
 
       if (!response.ok) {
-        throw new Error(result.message || result.error || 'Failed to create booking');
+        throw new Error(result?.message || result?.error || `Server error: ${response.status}`);
       }
 
       console.log('Booking created successfully without payment:', result);

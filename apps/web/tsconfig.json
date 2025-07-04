@@ -37,11 +37,12 @@
     "../dist/apps/.next/types/**/*.ts",
     ".next/types/**/*.ts",
     "next-env.d.ts",
+    "out/types/**/*.ts",
     "src/**/*.js",
     "src/**/*.jsx",
     "src/**/*.ts",
     "src/**/*.tsx",
-    "out/types/**/*.ts"
+    "../../dist/apps/web/.next/types/**/*.ts"
   ],
   "exclude": [
     "out-tsc",

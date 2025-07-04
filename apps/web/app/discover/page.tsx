@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Navigation from '../../components/ui/Navigation';
-import SearchBar from '@vinventure/ui/ui/SearchBar';
-import FilterPanel from '@vinventure/ui/ui/FilterPanel';
+import WineryFiltersComponent from '../../components/search/WineryFilters';
 import WineryGrid from '../../components/winery/WineryGrid';
-import Pagination from '@vinventure/ui/ui/Pagination';
 import { WineryFilters, WinerySearchResponse } from '@vinventure/types/types/winery';
 import { searchWineries } from '../../lib/mock-data';
 
@@ -94,39 +92,11 @@ function DiscoverContent() {
     fetchWineries(filters, currentPage);
   }, [fetchWineries, filters, currentPage]);
 
-  // Debounced search handler
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
-  
-  const handleSearchChange = useCallback((search: string) => {
-    const newFilters = { ...filters, search };
-    setFilters(newFilters);
-    
-    // Clear existing timeout
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    
-    // Set new timeout for debounced search
-    const timeout = setTimeout(() => {
-      setCurrentPage(1);
-      updateURL(newFilters, 1);
-    }, 500);
-    
-    setSearchTimeout(timeout);
-  }, [filters, searchTimeout, updateURL]);
-
   const handleFiltersChange = useCallback((newFilters: WineryFilters) => {
     setFilters(newFilters);
     setCurrentPage(1);
     updateURL(newFilters, 1);
   }, [updateURL]);
-
-  const handleClearFilters = useCallback(() => {
-    const clearedFilters = { ...initialFilters, search: filters.search };
-    setFilters(clearedFilters);
-    setCurrentPage(1);
-    updateURL(clearedFilters, 1);
-  }, [filters.search, updateURL]);
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
@@ -134,15 +104,6 @@ function DiscoverContent() {
     // Scroll to top of results
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [filters, updateURL]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-      }
-    };
-  }, [searchTimeout]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -158,38 +119,11 @@ function DiscoverContent() {
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
-              <SearchBar
-                value={filters.search}
-                onChange={handleSearchChange}
-                placeholder="Search by winery name, region, or description..."
-                className="w-full"
-              />
-            </div>
-            <div className="lg:w-auto">
-              <FilterPanel
-                filters={filters}
-                onFiltersChange={handleFiltersChange}
-                onClearFilters={handleClearFilters}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Results Summary */}
-        {data && !loading && (
-          <div className="mb-6">
-            <p className="text-gray-600">
-              {data.pagination.total === 0 
-                ? 'No wineries found'
-                : `Found ${data.pagination.total} winer${data.pagination.total === 1 ? 'y' : 'ies'}`
-              }
-              {filters.search && ` for "${filters.search}"`}
-            </p>
-          </div>
-        )}
+        <WineryFiltersComponent
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          resultsCount={data?.pagination.total}
+        />
 
         {/* Error State */}
         {error && (
@@ -224,13 +158,25 @@ function DiscoverContent() {
 
         {/* Pagination */}
         {data && data.pagination.totalPages > 1 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={data.pagination.totalPages}
-            onPageChange={handlePageChange}
-            totalItems={data.pagination.total}
-            itemsPerPage={limit}
-          />
+          <div className="flex justify-center items-center space-x-2">
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <span className="px-3 py-2 text-sm text-gray-700">
+              Page {currentPage} of {data.pagination.totalPages}
+            </span>
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === data.pagination.totalPages}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
+          </div>
         )}
       </div>
     </div>

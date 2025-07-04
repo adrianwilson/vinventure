@@ -33,17 +33,26 @@ interface WineryCardProps {
   winery: Winery;
   isFavorite?: boolean;
   onToggleFavorite?: (wineryId: string) => void;
+  onRemoveFavorite?: (wineryId: string) => void;
+  showFavoriteButton?: boolean;
 }
 
 export default function WineryCard({ 
   winery, 
   isFavorite = false, 
-  onToggleFavorite 
+  onToggleFavorite,
+  onRemoveFavorite,
+  showFavoriteButton = true
 }: WineryCardProps) {
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    onToggleFavorite?.(winery.id);
+    
+    if (isFavorite && onRemoveFavorite) {
+      onRemoveFavorite(winery.id);
+    } else if (onToggleFavorite) {
+      onToggleFavorite(winery.id);
+    }
   };
 
   const averagePrice = winery.experiences?.length 
@@ -69,7 +78,7 @@ export default function WineryCard({
         )}
         
         {/* Favorite Button */}
-        {onToggleFavorite && (
+        {showFavoriteButton && (onToggleFavorite || onRemoveFavorite) && (
           <button
             onClick={handleFavoriteClick}
             className="absolute top-3 right-3 p-2 bg-white/90 rounded-full hover:bg-white transition-colors"

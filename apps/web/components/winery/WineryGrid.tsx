@@ -7,6 +7,8 @@ interface WineryGridProps {
   wineries: Winery[];
   favoriteWineryIds?: string[];
   onToggleFavorite?: (wineryId: string) => void;
+  onRemoveFavorite?: (wineryId: string) => void;
+  showFavorites?: boolean;
   loading?: boolean;
 }
 
@@ -14,6 +16,8 @@ export default function WineryGrid({
   wineries, 
   favoriteWineryIds = [], 
   onToggleFavorite,
+  onRemoveFavorite,
+  showFavorites = false,
   loading = false 
 }: WineryGridProps) {
   if (loading) {
@@ -64,8 +68,10 @@ export default function WineryGrid({
         <WineryCard
           key={winery.id}
           winery={winery}
-          isFavorite={favoriteWineryIds.includes(winery.id)}
+          isFavorite={showFavorites || favoriteWineryIds.includes(winery.id)}
           onToggleFavorite={onToggleFavorite}
+          onRemoveFavorite={onRemoveFavorite}
+          showFavoriteButton={true}
         />
       ))}
     </div>
