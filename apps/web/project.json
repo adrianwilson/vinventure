@@ -109,7 +109,6 @@
     },
     "deploy": {
       "executor": "nx:run-commands",
-      "dependsOn": ["build"],
       "options": {
         "commands": [
           "nx deploy infrastructure",

@@ -11,8 +11,8 @@ const nextConfig = {
   // See: https://nx.dev/recipes/next/next-config-setup
   nx: {},
   
-  // Static export for S3/CloudFront deployment - temporarily disabled due to React 19 SSR issue
-  // output: 'export',
+  // Static export for S3/CloudFront deployment
+  output: 'export',
   distDir: '.next',
   trailingSlash: true,
   images: {

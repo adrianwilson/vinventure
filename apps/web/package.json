@@ -1,18 +1,12 @@
 {
-  "name": "@vinventure/apps",
+  "name": "@vinventure/web",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "build": "next build",
+    "build:static": "next build && next export",
     "dev": "next dev",
-    "start": "next start",
-    "lint": "next lint",
-    "type-check": "tsc --noEmit",
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts"
+    "start": "next start"
   },
   "dependencies": {
     "@heroicons/react": "^2.0.18",
