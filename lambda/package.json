@@ -1,0 +1,14 @@
+{
+  "name": "vinventure-lambda",
+  "version": "1.0.0",
+  "description": "Lambda functions for VinVenture API",
+  "main": "api-handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.490.0",
+    "@aws-sdk/client-rds-data": "^3.490.0",
+    "jsonwebtoken": "^9.0.2"
+  }
+}
