@@ -2,16 +2,23 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Start Next.js Dev Server",
+      "label": "serve",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "dependsOn": ["web", "api"]
+    },
+    {
+      "label": "web",
       "type": "shell",
       "command": "pnpm",
       "args": ["run", "dev"],
       "options": {
         "cwd": "${workspaceFolder}"
-      },
-      "group": {
-        "kind": "build",
-        "isDefault": true
       },
       "presentation": {
         "echo": true,
@@ -25,6 +32,16 @@
         "runOn": "folderOpen"
       },
       "problemMatcher": "$tsc"
+    },
+    {
+      "label": "api",
+      "type": "npm",
+      "script": "dev",
+      "isBackground": true,
+      "presentation": {
+        "focus": true,
+        "panel": "dedicated"
+      }
     },
     {
       "label": "Generate Prisma Client",
