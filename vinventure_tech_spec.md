@@ -249,6 +249,181 @@ VinVenture is a mobile-first SaaS application that connects wine enthusiasts wit
 
 ---
 
+## API Specification
+
+### **Authentication Endpoints**
+```
+POST   /api/auth/register        - User registration
+POST   /api/auth/login          - User login
+POST   /api/auth/logout         - User logout
+POST   /api/auth/refresh        - Refresh JWT token
+POST   /api/auth/forgot         - Password reset request
+POST   /api/auth/reset          - Password reset confirmation
+```
+
+### **User Management**
+```
+GET    /api/users/profile       - Get user profile
+PUT    /api/users/profile       - Update user profile
+GET    /api/users/favorites     - Get user's favorite wineries
+POST   /api/users/favorites     - Add winery to favorites
+DELETE /api/users/favorites/:id - Remove from favorites
+```
+
+### **Winery Endpoints**
+```
+GET    /api/wineries            - Search/list wineries (with filters)
+GET    /api/wineries/:id        - Get winery details
+POST   /api/wineries            - Create winery (winery admin)
+PUT    /api/wineries/:id        - Update winery (winery admin)
+DELETE /api/wineries/:id        - Delete winery (admin only)
+GET    /api/wineries/:id/reviews - Get winery reviews
+```
+
+### **Experience Management**
+```
+GET    /api/experiences         - List all experiences
+GET    /api/experiences/:id     - Get experience details
+POST   /api/experiences         - Create experience (winery admin)
+PUT    /api/experiences/:id     - Update experience (winery admin)
+DELETE /api/experiences/:id     - Delete experience (winery admin)
+GET    /api/experiences/:id/availability - Check availability
+```
+
+### **Booking System**
+```
+POST   /api/bookings            - Create booking
+GET    /api/bookings            - List user bookings
+GET    /api/bookings/:id        - Get booking details
+PUT    /api/bookings/:id        - Update booking
+DELETE /api/bookings/:id        - Cancel booking
+POST   /api/bookings/:id/payment - Process payment
+```
+
+### **Review System**
+```
+POST   /api/reviews             - Create review
+GET    /api/reviews/:id         - Get review details
+PUT    /api/reviews/:id         - Update review (user only)
+DELETE /api/reviews/:id         - Delete review
+GET    /api/reviews/winery/:id  - Get reviews for winery
+```
+
+### **Admin Endpoints**
+```
+GET    /api/admin/wineries      - List all wineries (pending approval)
+PUT    /api/admin/wineries/:id/approve - Approve winery
+GET    /api/admin/users         - List all users
+PUT    /api/admin/users/:id/ban - Ban user
+GET    /api/admin/analytics     - Platform analytics
+```
+
+---
+
+## Security Considerations
+
+### **Authentication & Authorization**
+- JWT tokens with 15-minute expiration, 7-day refresh tokens
+- Role-based access control (User, Winery Admin, Platform Admin)
+- Multi-factor authentication for admin accounts
+- OAuth integration for social login (Google, Facebook)
+
+### **Data Protection**
+- All API communication over HTTPS (TLS 1.3)
+- Input validation and sanitization on all endpoints
+- SQL injection prevention through Prisma ORM
+- XSS protection with Content Security Policy headers
+- Rate limiting (100 requests/minute per IP)
+
+### **Infrastructure Security**
+- AWS WAF for DDoS protection
+- VPC with private subnets for database
+- Secrets management through AWS Systems Manager
+- Database encryption at rest and in transit
+- Regular security patches and dependency updates
+
+### **Payment Security**
+- PCI DSS compliance through Stripe
+- No credit card data stored locally
+- Webhook signature verification
+- Secure tokenization for saved payment methods
+
+---
+
+## Performance & Monitoring
+
+### **Performance Targets**
+- Page load time: < 2 seconds (Core Web Vitals)
+- API response time: < 200ms (95th percentile)
+- Database query time: < 50ms (average)
+- Image load time: < 1 second (CDN cached)
+
+### **Monitoring & Alerting**
+- CloudWatch for infrastructure monitoring
+- Application Performance Monitoring (APM) with New Relic
+- Error tracking with Sentry
+- Real User Monitoring (RUM) for frontend performance
+- Uptime monitoring with 99.9% SLA
+
+### **Caching Strategy**
+- Redis for session storage and API caching
+- CloudFront CDN for static assets
+- Database query result caching (5-minute TTL)
+- Browser caching for images and static content
+
+### **Scalability Planning**
+- Horizontal scaling with AWS Auto Scaling Groups
+- Database read replicas for heavy read operations
+- Queue system (AWS SQS) for background processing
+- Microservice architecture consideration for future growth
+
+---
+
+## Data Management & Backup
+
+### **Backup Strategy**
+- Automated daily RDS snapshots with 7-day retention
+- Weekly full database exports to S3
+- Point-in-time recovery capability (35 days)
+- Cross-region backup replication for disaster recovery
+
+### **Data Migration**
+- Database schema migrations with Prisma
+- Zero-downtime deployment strategies
+- Data validation scripts for migration verification
+- Rollback procedures for failed migrations
+
+### **Data Retention Policy**
+- User data: Retained indefinitely (unless deletion requested)
+- Booking history: 7 years for tax/legal compliance
+- Payment data: Handled by Stripe (PCI compliant)
+- Analytics data: 2 years rolling retention
+- Log files: 90 days retention
+
+---
+
+## Testing Strategy
+
+### **Testing Framework**
+- Unit tests: Jest + React Testing Library (>90% coverage)
+- Integration tests: Supertest for API endpoints
+- End-to-end tests: Playwright for critical user flows
+- Load testing: Artillery.js for performance validation
+
+### **CI/CD Pipeline**
+- GitHub Actions for automated testing
+- Automated security scanning with CodeQL
+- Dependency vulnerability scanning
+- Automated deployment to staging/production
+
+### **Quality Gates**
+- All tests must pass before deployment
+- Code coverage must be >90%
+- Security vulnerabilities must be resolved
+- Performance regression testing
+
+---
+
 ## Conclusion
 
 VinVenture has a **solid foundation** with excellent frontend architecture and comprehensive database design. The critical missing piece is the **backend API layer** that connects the beautiful UI to the database. Once this gap is bridged, the application will be fully functional and ready for production deployment.
