@@ -1,0 +1,33 @@
+name: "VinVenture CodeQL Config"
+
+disable-default-queries: false
+
+queries:
+  - uses: security-and-quality
+  - uses: security-extended
+
+paths-ignore:
+  - node_modules
+  - dist
+  - build
+  - out
+  - .next
+  - coverage
+  - "**/*.test.ts"
+  - "**/*.test.tsx" 
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+  - "**/*.d.ts"
+  - apps/web/generated/
+  - lambda/node_modules
+  - apps/infrastructure/cdk.out
+
+paths:
+  - apps/web
+  - lambda/src
+  - libs
+
+# Additional packs for enhanced security scanning
+packs:
+  - codeql/javascript-queries:security-extended.qls
+  - codeql/javascript-queries:security-and-quality.qls

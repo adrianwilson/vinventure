@@ -1,0 +1,146 @@
+version: 2
+
+updates:
+  # Enable version updates for npm (root)
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    assignees:
+      - "vinventure-team"
+    reviewers:
+      - "vinventure-team"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "npm"
+    groups:
+      development-dependencies:
+        dependency-type: "development"
+        patterns:
+          - "@types/*"
+          - "@typescript-eslint/*"
+          - "eslint*"
+          - "prettier"
+          - "jest*"
+          - "@testing-library/*"
+          - "vitest*"
+      nx-dependencies:
+        patterns:
+          - "@nx/*"
+          - "nx"
+      react-dependencies:
+        patterns:
+          - "react*"
+          - "@next/*"
+          - "next"
+
+  # Enable version updates for npm (web app)
+  - package-ecosystem: "npm"
+    directory: "/apps/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    assignees:
+      - "vinventure-team"
+    reviewers:
+      - "vinventure-team"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "frontend"
+    groups:
+      aws-dependencies:
+        patterns:
+          - "@aws-sdk/*"
+          - "aws-*"
+      ui-dependencies:
+        patterns:
+          - "@heroicons/*"
+          - "tailwindcss"
+          - "postcss*"
+          - "@headlessui/*"
+
+  # Enable version updates for npm (lambda)
+  - package-ecosystem: "npm"
+    directory: "/lambda"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    assignees:
+      - "vinventure-team"
+    reviewers:
+      - "vinventure-team"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "backend"
+    groups:
+      nestjs-dependencies:
+        patterns:
+          - "@nestjs/*"
+          - "nest*"
+      prisma-dependencies:
+        patterns:
+          - "prisma"
+          - "@prisma/*"
+      aws-dependencies:
+        patterns:
+          - "aws-*"
+          - "@aws-sdk/*"
+
+  # Enable version updates for npm (infrastructure)
+  - package-ecosystem: "npm"
+    directory: "/apps/infrastructure"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+    open-pull-requests-limit: 3
+    assignees:
+      - "vinventure-team"
+    reviewers:
+      - "vinventure-team"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "infrastructure"
+    groups:
+      cdk-dependencies:
+        patterns:
+          - "aws-cdk*"
+          - "@aws-cdk/*"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    assignees:
+      - "vinventure-team"
+    reviewers:
+      - "vinventure-team"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
