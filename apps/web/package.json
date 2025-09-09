@@ -16,7 +16,7 @@
     "@aws-sdk/credential-providers": "^3.698.0",
     "aws-jwt-verify": "^4.0.1",
     "@stripe/stripe-js": "^2.4.0",
-    "@stripe/react-stripe-js": "^2.4.0",
+    "@stripe/react-stripe-js": "^4.0.1",
     "next": "~15.2.4",
     "react": "19.0.0",
     "react-dom": "19.0.0"
