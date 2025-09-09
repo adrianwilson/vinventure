@@ -38,6 +38,7 @@ export default function BookingManagement() {
   const [statusFilter, setStatusFilter] = useState<BookingFilter>('all');
   const [dateFilter, setDateFilter] = useState<DateFilter>('all');
   const [mounted, setMounted] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -62,7 +63,10 @@ export default function BookingManagement() {
         });
         
         if (!wineriesResponse.ok) {
-          throw new Error(`Failed to fetch wineries: ${wineriesResponse.status}`);
+          console.warn('Wineries API not available, using fallback');
+          setApiError('Backend API is not available. Please start the backend server on localhost:3001');
+          setBookings([]);
+          return;
         }
         
         const wineries = await wineriesResponse.json();
@@ -79,7 +83,9 @@ export default function BookingManagement() {
           });
           
           if (!bookingsResponse.ok) {
-            throw new Error(`Failed to fetch bookings: ${bookingsResponse.status}`);
+            console.warn('Bookings API not available, using fallback');
+            setBookings([]);
+            return;
           }
           
           const bookingsData = await bookingsResponse.json();
@@ -113,7 +119,13 @@ export default function BookingManagement() {
         }
       } catch (error) {
         console.error('Failed to fetch bookings:', error);
-        // Keep component working if API fails
+        // Show user-friendly message for API failures
+        if (error.message.includes('Failed to fetch')) {
+          setApiError('Backend API is not available. Please start the backend server on localhost:3001');
+        } else {
+          setApiError('Failed to load booking data. Please try again.');
+        }
+        setBookings([]);
       } finally {
         setLoading(false);
       }
@@ -252,6 +264,38 @@ export default function BookingManagement() {
 
   return (
     <div className="space-y-6">
+      {/* API Error Display */}
+      {apiError && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-yellow-800">
+                API Connection Issue
+              </h3>
+              <div className="mt-2 text-sm text-yellow-700">
+                <p>{apiError}</p>
+              </div>
+              <div className="mt-3">
+                <button
+                  onClick={() => {
+                    setApiError(null);
+                    window.location.reload();
+                  }}
+                  className="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-3 py-1 rounded text-sm"
+                >
+                  Retry
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
