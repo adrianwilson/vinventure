@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Winery, WineryStatus, ExperienceType, WINE_TYPES, EXPERIENCE_TYPE_LABELS } from '@vinventure/types/types/winery';
+import { Winery, WineryStatus, ExperienceType, WINE_TYPES, EXPERIENCE_TYPE_LABELS } from '../../../types/winery';
 
 interface WineryFormData {
   name: string;

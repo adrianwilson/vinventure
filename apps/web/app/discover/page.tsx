@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Navigation from '../../components/ui/Navigation';
 import WineryFiltersComponent from '../../components/search/WineryFilters';
 import WineryGrid from '../../components/winery/WineryGrid';
-import { WineryFilters, WinerySearchResponse } from '@vinventure/types/types/winery';
+import { WineryFilters, WinerySearchResponse } from '../../types/winery';
 import { searchWineries } from '../../lib/mock-data';
 import { useFavorites } from '../../contexts/FavoritesContext';
 

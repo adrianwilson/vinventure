@@ -1,4 +1,4 @@
-import { Winery, WinerySearchResponse, ExperienceType } from '@vinventure/types/types/winery';
+import { Winery, WinerySearchResponse, ExperienceType } from '../types/winery';
 
 // Mock wineries data for static deployment
 export const mockWineries: Winery[] = [

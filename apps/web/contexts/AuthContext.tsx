@@ -59,9 +59,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
               const currentUser = await CognitoAuthService.getCurrentUser(accessToken);
               setUser(currentUser);
             } catch (error) {
-              // Try to refresh tokens if access token is expired
-              console.log('Access token expired, attempting refresh...');
-              await refreshSession();
+              console.error('Failed to get current user:', error);
+              clearTokens();
             }
           }
         }
@@ -73,7 +72,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     };
 
-    checkSession();
+    // Set a timeout to ensure loading state doesn't hang indefinitely
+    const timeoutId = setTimeout(() => {
+      console.warn('Auth check timed out, setting loading to false');
+      setLoading(false);
+    }, 10000); // 10 second timeout
+
+    checkSession().finally(() => {
+      clearTimeout(timeoutId);
+    });
   }, []);
 
   const clearTokens = () => {

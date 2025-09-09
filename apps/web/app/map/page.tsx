@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Winery } from '@vinventure/types/types/winery';
+import { Winery } from '../../types/winery';
 import WineryMap from '../../components/map/WineryMap';
 import WineryCard from '../../components/winery/WineryCard';
 import Navigation from '../../components/ui/Navigation';

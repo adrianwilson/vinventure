@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Winery } from '@vinventure/types/types/winery';
+import { Winery } from '../../types/winery';
 import { loadGoogleMapsAPI, isGoogleMapsLoaded } from '../../lib/google-maps-loader';
 
 interface WineryMapProps {

@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { canAccessWineryAdmin, canAccessPlatformAdmin, getRoleDisplayName } from '../../lib/roles';
 
 interface NavigationProps {
-  currentPage?: 'home' | 'discover' | 'map' | 'favorites' | 'dashboard' | 'winery-admin' | 'auth';
+  currentPage?: 'home' | 'discover' | 'map' | 'favorites' | 'dashboard' | 'winery-admin' | 'admin' | 'auth';
 }
 
 export default function Navigation({ currentPage = 'home' }: NavigationProps) {
@@ -139,21 +140,42 @@ export default function Navigation({ currentPage = 'home' }: NavigationProps) {
                   Dashboard
                 </Link>
                 
-                {/* TODO: Add role-based visibility - show only for WINERY_ADMIN users */}
-                <Link 
-                  href="/winery-admin" 
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    currentPage === 'winery-admin' 
-                      ? 'text-purple-600 bg-purple-50' 
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  Winery Admin
-                </Link>
+                {/* Winery Admin - Only show for WINERY_ADMIN and PLATFORM_ADMIN users */}
+                {canAccessWineryAdmin(user?.role) && (
+                  <Link 
+                    href="/winery-admin" 
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      currentPage === 'winery-admin' 
+                        ? 'text-purple-600 bg-purple-50' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Winery Admin
+                  </Link>
+                )}
+
+                {/* Platform Admin - Only show for PLATFORM_ADMIN users */}
+                {canAccessPlatformAdmin(user?.role) && (
+                  <Link 
+                    href="/admin" 
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      currentPage === 'admin' 
+                        ? 'text-purple-600 bg-purple-50' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Platform Admin
+                  </Link>
+                )}
                 
-                <span className="text-gray-700 text-sm">
-                  {user.displayName || user.email}
-                </span>
+                <div className="text-right">
+                  <div className="text-gray-700 text-sm font-medium">
+                    {user.displayName || user.email}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {getRoleDisplayName(user.role || 'GUEST')}
+                  </div>
+                </div>
                 <button
                   onClick={handleSignOut}
                   className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"

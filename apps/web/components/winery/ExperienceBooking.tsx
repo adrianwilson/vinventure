@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Winery, Experience } from '@vinventure/types/types/winery';
+import { Winery, Experience } from '../../types/winery';
 import { useAuth } from '../../contexts/AuthContext';
 import StripePayment from '../payment/StripePayment';
 

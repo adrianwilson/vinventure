@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Winery } from '@vinventure/types/types/winery';
+import { Winery } from '../../../types/winery';
 import { mockWineries } from '../../../lib/mock-data';
 import WineryDetail from '../../../components/winery/WineryDetail';
 import LoadingSpinner from '../../../components/ui/LoadingSpinner';

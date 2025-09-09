@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Winery, Experience, EXPERIENCE_TYPE_LABELS } from '@vinventure/types/types/winery';
+import { Winery, Experience, EXPERIENCE_TYPE_LABELS } from '../../types/winery';
 import ExperienceBooking from './ExperienceBooking';
 import ReviewsSection from '../reviews/ReviewsSection';
 import FavoriteButton from '../favorites/FavoriteButton';

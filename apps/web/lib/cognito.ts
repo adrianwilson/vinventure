@@ -38,6 +38,8 @@ export interface CognitoUser {
   accessToken: string;
   idToken: string;
   refreshToken: string;
+  role?: 'GUEST' | 'WINERY_ADMIN' | 'PLATFORM_ADMIN';
+  displayName?: string;
 }
 
 export interface SignUpData {
@@ -260,14 +262,62 @@ export class CognitoAuthService {
         }
       });
 
-      return {
+      // Check for development role override first
+      const getDevRole = () => {
+        if (typeof window !== 'undefined') {
+          const savedRole = localStorage.getItem('dev_user_role');
+          if (savedRole) {
+            console.log(`[DEV] Using development role override: ${savedRole}`);
+            return savedRole as 'GUEST' | 'WINERY_ADMIN' | 'PLATFORM_ADMIN';
+          }
+        }
+        return null;
+      };
+
+      const devRole = getDevRole();
+
+      const baseUser = {
         username: response.Username || '',
         email: attributes.email || '',
         attributes,
         accessToken,
         idToken: '', // We don't have ID token from GetUser
         refreshToken: '', // We don't have refresh token from GetUser
+        displayName: attributes.name || attributes.email || '',
+        role: devRole || ('GUEST' as const), // Use dev role if available, otherwise default to GUEST
       };
+
+      // Only try to fetch role from backend if no dev role override exists
+      if (!devRole) {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+          
+          const apiResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'}/api/auth/profile`, {
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            signal: controller.signal,
+          });
+          
+          clearTimeout(timeoutId);
+
+          if (apiResponse.ok) {
+            const profileData = await apiResponse.json();
+            baseUser.role = profileData.role || 'GUEST';
+            baseUser.displayName = profileData.name || baseUser.displayName;
+          }
+        } catch (error: any) {
+          if (error.name === 'AbortError') {
+            console.warn('Backend API request timed out, defaulting to GUEST role');
+          } else {
+            console.warn('Could not fetch user role from backend, defaulting to GUEST:', error.message);
+          }
+        }
+      }
+
+      return baseUser;
     } catch (error) {
       return null;
     }

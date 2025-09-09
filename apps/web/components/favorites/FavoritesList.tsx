@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFavorites } from '../../contexts/FavoritesContext';
 import WineryGrid from '../winery/WineryGrid';
-import { Winery } from '@vinventure/types/types/winery';
+import { Winery } from '../../types/winery';
 import { mockWineries } from '../../lib/mock-data';
 
 interface FavoritesListProps {
