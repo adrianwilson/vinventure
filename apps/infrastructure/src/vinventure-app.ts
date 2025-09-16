@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { VinventureLambdaStack } from './vinventure-lambda-stack';
 
@@ -16,7 +15,7 @@ const envConfig = {
     domainName: undefined, // Use CloudFront domain for dev
   },
   staging: {
-    stackName: 'VinventureStack-Staging', 
+    stackName: 'VinventureStack-Staging',
     domainName: 'staging.vinventure.com', // Optional: custom domain
   },
   production: {
@@ -45,3 +44,5 @@ const stack = new VinventureLambdaStack(app, config.stackName, {
 cdk.Tags.of(stack).add('Environment', environment);
 cdk.Tags.of(stack).add('Project', 'VinVenture');
 cdk.Tags.of(stack).add('ManagedBy', 'AWS CDK');
+
+app.synth();
