@@ -1,0 +1,40 @@
+# Global code owners - these users will be requested for review on every PR
+* @adrian
+
+# Infrastructure and deployment
+apps/infrastructure/ @adrian
+.github/workflows/ @adrian
+cdk.json @adrian
+*.yml @adrian
+*.yaml @adrian
+
+# Database and backend
+lambda/ @adrian
+libs/database/ @adrian
+libs/shared/ @adrian
+prisma/ @adrian
+
+# Frontend web application
+apps/web/ @adrian
+libs/ui/ @adrian
+libs/types/ @adrian
+
+# Mobile application
+apps/mobile/ @adrian
+
+# Documentation
+docs/ @adrian
+*.md @adrian
+README.md @adrian
+
+# Configuration files
+package.json @adrian
+pnpm-lock.yaml @adrian
+nx.json @adrian
+tsconfig*.json @adrian
+tailwind.config.js @adrian
+next.config.js @adrian
+
+# Security and secrets
+.github/dependabot.yml @adrian
+.github/codeql-config.yml @adrian

@@ -100,9 +100,10 @@ STRIPE_LIVE_WEBHOOK_SECRET=whsec_...
 ### 6. Test Deployment
 
 ```bash
-# Test staging deployment
-git checkout develop
-git push origin develop
+# Test staging deployment (create a pull request)
+git checkout -b feature/test-deployment
+git push origin feature/test-deployment
+# Create PR to main branch - this triggers staging deployment
 
 # Test production deployment  
 git checkout main
@@ -113,13 +114,17 @@ git push origin main
 
 ### Available Workflows
 
-1. **`app-deploy.yml`** - Main application deployment
+1. **`ci.yml`** - Main CI/CD pipeline
    - Builds frontend and backend
    - Runs security scans
-   - Deploys using CDK
-   - Supports staging and production
+   - Deploys to staging on PR, production on merge
+   - Intelligent change detection
 
-2. **`cdk-deploy.yml`** - Infrastructure-only deployment
+2. **`app-deploy.yml`** - Alternative application deployment
+   - CDK-based deployment approach
+   - Environment-specific builds
+
+3. **`cdk-deploy.yml`** - Infrastructure-only deployment
    - CDK diff on PRs
    - Deploy infrastructure changes
    - Manual destroy capability
@@ -140,7 +145,7 @@ git push origin main
 
 ### Deployment Triggers
 
-- **Push to `develop`** → Deploy to staging
+- **Pull Request to `main`** → Deploy to staging (preview environment)
 - **Push to `main`** → Deploy to production
 - **Pull Request** → Run tests and security scans
 - **Manual trigger** → Deploy specific environment
