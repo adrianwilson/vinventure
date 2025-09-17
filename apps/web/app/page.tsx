@@ -7,7 +7,7 @@ export default function Index() {
         <div className="text-center">
           <h1 className="text-6xl font-bold text-purple-900 mb-4">VinVenture</h1>
           <p className="text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
-            Discover amazing wine experiences at the world's finest wineries. 
+            Discover unique wine experiences at the world's finest wineries. 
             Book tastings, tours, and exclusive events with local vintners.
           </p>
           
