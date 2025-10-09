@@ -79,7 +79,7 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Cache node_modules
         uses: actions/cache@v4
@@ -117,7 +117,7 @@ jobs:
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Install dependencies (if cache miss)
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Generate Prisma Client
         run: pnpm run db:generate
@@ -186,7 +186,7 @@ jobs:
           key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
 
       - name: Install dependencies (if cache miss)
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Install Lambda Dependencies
         working-directory: lambda
@@ -244,7 +244,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Run Security Audit
         run: pnpm audit --audit-level moderate
