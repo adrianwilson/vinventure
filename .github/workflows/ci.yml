@@ -7,6 +7,26 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: false
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      run_tests:
+        description: 'Run all tests'
+        required: false
+        default: true
+        type: boolean
+      deploy:
+        description: 'Deploy after build'
+        required: false
+        default: true
+        type: boolean
 
 env:
   NODE_VERSION: '18'
@@ -274,7 +294,9 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     needs: [changes, frontend-ci, backend-ci]
-    if: github.event_name == 'pull_request' && (needs.frontend-ci.result == 'success' || needs.backend-ci.result == 'success')
+    if: |
+      (github.event_name == 'pull_request' && (needs.frontend-ci.result == 'success' || needs.backend-ci.result == 'success')) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging' && github.event.inputs.deploy == 'true')
     environment:
       name: staging
       url: https://staging.vinventure.app
@@ -334,7 +356,9 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [changes, frontend-ci, backend-ci, security-scan]
-    if: github.ref == 'refs/heads/main' && (needs.frontend-ci.result == 'success' || needs.backend-ci.result == 'success') && needs.security-scan.result == 'success'
+    if: |
+      (github.ref == 'refs/heads/main' && github.event_name == 'push' && (needs.frontend-ci.result == 'success' || needs.backend-ci.result == 'success') && needs.security-scan.result == 'success') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production' && github.event.inputs.deploy == 'true')
     environment:
       name: production
       url: https://vinventure.app
