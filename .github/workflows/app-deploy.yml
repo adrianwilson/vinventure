@@ -167,7 +167,7 @@ jobs:
     # Download artifacts if they were built
     - name: Download frontend build
       if: needs.build-and-test.outputs.frontend-changed == 'true'
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v6
       with:
         name: frontend-build-${{ github.sha }}
         path: apps/web/out/
@@ -250,7 +250,7 @@ jobs:
     # Download artifacts if they were built
     - name: Download frontend build
       if: needs.build-and-test.outputs.frontend-changed == 'true'
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v6
       with:
         name: frontend-build-${{ github.sha }}
         path: apps/web/out/
