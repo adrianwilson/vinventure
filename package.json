@@ -46,10 +46,10 @@
     "@nx/vite": "21.2.2",
     "@nx/web": "21.2.2",
     "@nx/workspace": "21.2.2",
-    "eslint": "^9.8.0",
-    "eslint-config-prettier": "^10.0.0",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
     "nx": "21.2.2",
-    "prettier": "^2.6.2",
+    "prettier": "^3.6.2",
     "typescript": "~5.8.2",
     "typescript-eslint": "^8.29.0"
   },
