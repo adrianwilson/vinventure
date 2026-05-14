@@ -142,8 +142,8 @@ export default function ReviewsSection({
         ...reviewData,
         createdAt: new Date().toISOString(),
         user: {
-          id: user!.sub,
-          displayName: user!.displayName,
+          id: user!.sub || user!.username,
+          displayName: user!.displayName ?? null,
           email: user!.email
         }
       };

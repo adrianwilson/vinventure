@@ -3,12 +3,10 @@ let isLoading = false;
 let isLoaded = false;
 let loadPromise: Promise<void> | null = null;
 
-export interface GoogleMapsWindow extends Window {
-  google?: typeof google;
-}
-
 declare global {
-  interface Window extends GoogleMapsWindow {}
+  interface Window {
+    google?: typeof google;
+  }
 }
 
 export const loadGoogleMapsAPI = (): Promise<void> => {

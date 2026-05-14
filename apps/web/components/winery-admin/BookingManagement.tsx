@@ -117,10 +117,9 @@ export default function BookingManagement() {
           
           setBookings(transformedBookings);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch bookings:', error);
-        // Show user-friendly message for API failures
-        if (error.message.includes('Failed to fetch')) {
+        if (error.message?.includes('Failed to fetch')) {
           setApiError('Backend API is not available. Please start the backend server on localhost:3001');
         } else {
           setApiError('Failed to load booking data. Please try again.');

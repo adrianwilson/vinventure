@@ -9,7 +9,7 @@ import { mockWineries } from '../../lib/mock-data';
 import { useFavorites } from '../../contexts/FavoritesContext';
 
 export default function MapPage() {
-  const { favoriteWineryIds, toggleFavorite, isFavorite } = useFavorites();
+  const { toggleFavorite, isFavorite } = useFavorites();
   const [wineries, setWineries] = useState<Winery[]>([]);
   const [selectedWinery, setSelectedWinery] = useState<Winery | null>(null);
   const [loading, setLoading] = useState(true);

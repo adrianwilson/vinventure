@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EmailVerificationForm } from '../EmailVerificationForm';
 
@@ -12,6 +13,7 @@ jest.mock('../../../contexts/AuthContext', () => ({
 describe('EmailVerificationForm', () => {
   const mockProps = {
     email: 'test@example.com',
+    onVerify: jest.fn().mockResolvedValue(undefined),
     onVerificationSuccess: jest.fn(),
     onResendCode: jest.fn(),
   };

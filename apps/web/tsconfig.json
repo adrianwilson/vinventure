@@ -50,7 +50,9 @@
     "lib/**/*.js",
     "lib/**/*.jsx",
     "lib/**/*.ts",
-    "lib/**/*.tsx"
+    "lib/**/*.tsx",
+    "types/**/*.ts",
+    "types/**/*.tsx"
   ],
   "exclude": [
     "out-tsc",
@@ -59,6 +61,11 @@
     "jest.config.ts",
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "**/__tests__/**",
     ".next",
     "eslint.config.js",
     "eslint.config.cjs",

@@ -57,7 +57,7 @@ export default function BookingsList() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [isLocal, setIsLocal] = useState(false);
+  const [, setIsLocal] = useState(false);
 
   useEffect(() => {
     const fetchBookings = async () => {

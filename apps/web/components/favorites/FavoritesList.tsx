@@ -29,7 +29,7 @@ const mockUserFavorites = [
 
 export default function FavoritesList({ onRemoveFavorite }: FavoritesListProps) {
   const { user } = useAuth();
-  const { favoriteWineryIds, toggleFavorite, loading: favoritesLoading } = useFavorites();
+  const { favoriteWineryIds } = useFavorites();
   const [favoriteWineries, setFavoriteWineries] = useState<Winery[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

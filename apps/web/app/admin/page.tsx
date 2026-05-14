@@ -87,7 +87,8 @@ export default function AdminPage() {
     email: 'dev@example.com',
     name: 'Development User',
     role: 'PLATFORM_ADMIN' as const,
-    displayName: 'Development User'
+    displayName: 'Development User',
+    accessToken: 'dev-token',
   };
 
   useEffect(() => {
@@ -235,7 +236,7 @@ export default function AdminPage() {
                 You need Platform Administrator privileges to access this page.
               </p>
               <p className="text-sm text-gray-500 mb-4">
-                Current role: <span className="font-medium">{getRoleDisplayName(currentUser.role)}</span>
+                Current role: <span className="font-medium">{getRoleDisplayName(currentUser.role || 'GUEST')}</span>
               </p>
               <button
                 onClick={() => router.push('/dashboard')}
@@ -269,7 +270,7 @@ export default function AdminPage() {
               </div>
               <div className="flex-shrink-0">
                 <div className="bg-red-100 px-3 py-1 rounded-full text-sm text-red-800">
-                  {getRoleDisplayName(currentUser.role)}
+                  {getRoleDisplayName(currentUser.role || 'GUEST')}
                 </div>
               </div>
             </div>

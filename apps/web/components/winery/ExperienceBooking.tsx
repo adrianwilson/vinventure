@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Winery, Experience } from '../../types/winery';
 import { useAuth } from '../../contexts/AuthContext';
 import StripePayment from '../payment/StripePayment';
@@ -47,8 +47,8 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState(1); // 1: Details, 2: Payment, 3: Confirmation
-  const [paymentIntentId, setPaymentIntentId] = useState<string | null>(null);
-  const [booking, setBooking] = useState<any>(null);
+  const [, setPaymentIntentId] = useState<string | null>(null);
+  const [, setBooking] = useState<any>(null);
 
   // Generate available dates for the next 60 days
   const getAvailableDates = () => {

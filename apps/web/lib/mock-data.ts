@@ -1,4 +1,4 @@
-import { Winery, WinerySearchResponse, ExperienceType } from '../types/winery';
+import { Winery, WineryStatus, WinerySearchResponse, ExperienceType } from '../types/winery';
 
 // Mock wineries data for static deployment
 export const mockWineries: Winery[] = [
@@ -9,7 +9,7 @@ export const mockWineries: Winery[] = [
     email: 'info@sunsetvalley.com',
     phone: '+1 (555) 123-4567',
     website: 'https://sunsetvalley.com',
-    status: 'APPROVED',
+    status: WineryStatus.APPROVED,
     address: '123 Vineyard Lane',
     city: 'Napa',
     region: 'Napa Valley',
@@ -63,7 +63,7 @@ export const mockWineries: Winery[] = [
     email: 'contact@mountainridge.com',
     phone: '+1 (555) 234-5678',
     website: 'https://mountainridge.com',
-    status: 'APPROVED',
+    status: WineryStatus.APPROVED,
     address: '456 Hillside Drive',
     city: 'Sonoma',
     region: 'Sonoma County',
@@ -116,7 +116,7 @@ export const mockWineries: Winery[] = [
     email: 'info@coastalbreeze.com',
     phone: '+1 (555) 345-6789',
     website: 'https://coastalbreeze.com',
-    status: 'APPROVED',
+    status: WineryStatus.APPROVED,
     address: '789 Ocean View Road',
     city: 'Monterey',
     region: 'Central Coast',
@@ -169,7 +169,7 @@ export const mockWineries: Winery[] = [
     email: 'hello@heritageoaks.com',
     phone: '+1 (555) 456-7890',
     website: 'https://heritageoaks.com',
-    status: 'APPROVED',
+    status: WineryStatus.APPROVED,
     address: '321 Heritage Lane',
     city: 'Paso Robles',
     region: 'Central Coast',
