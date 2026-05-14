@@ -85,6 +85,12 @@ jobs:
           -p 5432:5432 \
           postgres:15
 
+    - name: Generate Prisma Client
+      if: steps.changes.outputs.backend == 'true' || github.event_name == 'pull_request'
+      run: |
+        cd lambda
+        npx prisma generate
+
     - name: Build and test backend
       if: steps.changes.outputs.backend == 'true' || github.event_name == 'pull_request'
       run: |
