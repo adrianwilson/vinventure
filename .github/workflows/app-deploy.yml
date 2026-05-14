@@ -27,7 +27,7 @@ jobs:
         fetch-depth: 0
 
     - name: Detect changes
-      uses: dorny/paths-filter@v2
+      uses: dorny/paths-filter@v3
       id: changes
       with:
         filters: |
@@ -50,7 +50,7 @@ jobs:
         node-version: ${{ env.NODE_VERSION }}
 
     - name: Setup pnpm
-      uses: pnpm/action-setup@v2
+      uses: pnpm/action-setup@v4
 
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
@@ -97,7 +97,7 @@ jobs:
 
     - name: Upload frontend build
       if: steps.changes.outputs.frontend == 'true'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: frontend-build-${{ github.sha }}
         path: apps/web/out/
@@ -105,7 +105,7 @@ jobs:
 
     - name: Upload backend build
       if: steps.changes.outputs.backend == 'true'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: backend-build-${{ github.sha }}
         path: lambda/dist/
@@ -130,7 +130,7 @@ jobs:
         output: 'trivy-results.sarif'
 
     - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: 'trivy-results.sarif'
 
@@ -152,10 +152,10 @@ jobs:
         node-version: ${{ env.NODE_VERSION }}
 
     - name: Setup pnpm
-      uses: pnpm/action-setup@v2
+      uses: pnpm/action-setup@v4
 
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -167,7 +167,7 @@ jobs:
     # Download artifacts if they were built
     - name: Download frontend build
       if: needs.build-and-test.outputs.frontend-changed == 'true'
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: frontend-build-${{ github.sha }}
         path: apps/web/out/
@@ -235,10 +235,10 @@ jobs:
         node-version: ${{ env.NODE_VERSION }}
 
     - name: Setup pnpm
-      uses: pnpm/action-setup@v2
+      uses: pnpm/action-setup@v4
 
     - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
+      uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -250,7 +250,7 @@ jobs:
     # Download artifacts if they were built
     - name: Download frontend build
       if: needs.build-and-test.outputs.frontend-changed == 'true'
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: frontend-build-${{ github.sha }}
         path: apps/web/out/
@@ -326,7 +326,7 @@ jobs:
         fi
 
     - name: Upload production outputs
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: production-deployment-info
         path: apps/infrastructure/cdk-outputs-production.json
