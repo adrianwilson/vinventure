@@ -110,6 +110,7 @@ apps/infrastructure/cdk.out/
 # Compiled TypeScript files (exclude config files and scripts)
 *.js
 *.d.ts
+!**/types/*.d.ts
 !*.config.js
 !scripts/*.js
 !mobile/*.js
