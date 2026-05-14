@@ -139,9 +139,6 @@ jobs:
       - name: Install dependencies (if cache miss)
         run: pnpm install
 
-      - name: Generate Prisma Client
-        run: pnpm run db:generate
-
       - name: TypeScript Check
         run: pnpm run type-check
 
