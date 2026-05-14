@@ -10,105 +10,151 @@
       "runOptions": {
         "runOn": "folderOpen"
       },
-      "dependsOn": ["web", "api"]
+      "dependsOn": ["docker:postgres", "api", "web"],
+      "dependsOrder": "sequence"
     },
     {
-      "label": "web",
+      "label": "docker:postgres",
       "type": "shell",
-      "command": "pnpm",
-      "args": ["run", "dev"],
+      "command": "docker start vinventure-db 2>/dev/null || docker run -d --name vinventure-db -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:17",
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "new",
-        "showReuseMessage": true,
-        "clear": false
-      },
-      "runOptions": {
-        "runOn": "folderOpen"
-      },
-      "problemMatcher": "$tsc"
-    },
-    {
-      "label": "api",
-      "type": "npm",
-      "script": "dev",
-      "isBackground": true,
-      "presentation": {
-        "focus": true,
-        "panel": "dedicated"
-      }
-    },
-    {
-      "label": "Generate Prisma Client",
-      "type": "shell",
-      "command": "nx",
-      "args": ["run", "apps:db:generate"],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "group": "build",
       "presentation": {
         "echo": true,
         "reveal": "silent",
         "focus": false,
         "panel": "shared",
         "showReuseMessage": false,
-        "clear": false
-      },
-      "runOptions": {
-        "runOn": "folderOpen"
-      }
-    },
-    {
-      "label": "Install Dependencies",
-      "type": "shell",
-      "command": "pnpm",
-      "args": ["install"],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "silent",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": false,
-        "clear": false
-      },
-      "runOptions": {
-        "runOn": "folderOpen"
-      }
-    },
-    {
-      "label": "Start React Native Metro",
-      "type": "shell",
-      "command": "nx",
-      "args": ["start", "mobile"],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "new",
-        "showReuseMessage": true,
         "clear": false
       },
       "problemMatcher": []
     },
     {
-      "label": "Prisma Studio",
+      "label": "api",
       "type": "shell",
-      "command": "nx",
-      "args": ["run", "apps:db:studio"],
+      "command": "pnpm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/lambda"
+      },
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^(.*)$",
+          "file": 1,
+          "line": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^\\[nodemon\\]",
+          "endsPattern": "VinVenture API running on"
+        }
+      }
+    },
+    {
+      "label": "web",
+      "type": "shell",
+      "command": "pnpm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "Install Dependencies",
+      "type": "shell",
+      "command": "pnpm install && cd lambda && pnpm install",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate Prisma Client",
+      "type": "shell",
+      "command": "cd lambda && npx prisma generate",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "db:migrate",
+      "type": "shell",
+      "command": "cd lambda && npx prisma migrate dev",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "db:studio",
+      "type": "shell",
+      "command": "cd lambda && npx prisma studio",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start React Native Metro",
+      "type": "shell",
+      "command": "nx start mobile",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -117,8 +163,8 @@
         "echo": true,
         "reveal": "always",
         "focus": false,
-        "panel": "new",
-        "showReuseMessage": true,
+        "panel": "dedicated",
+        "showReuseMessage": false,
         "clear": false
       },
       "problemMatcher": []
@@ -126,8 +172,7 @@
     {
       "label": "Run Tests",
       "type": "shell",
-      "command": "nx",
-      "args": ["test", "apps"],
+      "command": "pnpm run test",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -145,8 +190,7 @@
     {
       "label": "Lint",
       "type": "shell",
-      "command": "nx",
-      "args": ["lint", "apps"],
+      "command": "pnpm run lint",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -164,8 +208,7 @@
     {
       "label": "Type Check",
       "type": "shell",
-      "command": "nx",
-      "args": ["run", "apps:type-check"],
+      "command": "pnpm run type-check",
       "options": {
         "cwd": "${workspaceFolder}"
       },

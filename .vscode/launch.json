@@ -2,36 +2,54 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Next.js: debug server-side",
-      "type": "node-terminal",
+      "name": "API: NestJS",
+      "type": "node",
       "request": "launch",
-      "command": "nx dev apps",
-      "cwd": "${workspaceFolder}",
-      "serverReadyAction": {
-        "pattern": "- Local:.+(https?://.+)",
-        "uriFormat": "%s",
-        "action": "debugWithChrome"
-      }
-    },
-    {
-      "name": "Next.js: debug client-side",
-      "type": "chrome",
-      "request": "launch",
-      "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/apps/src"
-    },
-    {
-      "name": "Next.js: debug full stack",
-      "type": "node-terminal",
-      "request": "launch",
-      "command": "nx dev apps",
-      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["ts-node", "src/main.ts"],
+      "cwd": "${workspaceFolder}/lambda",
       "console": "integratedTerminal",
+      "restart": true,
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/lambda/dist/**/*.js"]
+    },
+    {
+      "name": "Web: Next.js",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm run dev",
+      "cwd": "${workspaceFolder}",
       "serverReadyAction": {
         "pattern": "- Local:.+(https?://.+)",
         "uriFormat": "%s",
         "action": "debugWithChrome"
       }
+    },
+    {
+      "name": "Full Stack (API + Web)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["ts-node", "src/main.ts"],
+      "cwd": "${workspaceFolder}/lambda",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/lambda/dist/**/*.js"],
+      "preLaunchTask": "docker:postgres",
+      "serverReadyAction": {
+        "pattern": "VinVenture API running on:.+(https?://.+)",
+        "uriFormat": "http://localhost:3000",
+        "action": "debugWithChrome"
+      },
+      "postDebugTask": "web"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug: API + Web",
+      "configurations": ["API: NestJS", "Web: Next.js"],
+      "preLaunchTask": "docker:postgres",
+      "stopAll": true
     }
   ]
 }

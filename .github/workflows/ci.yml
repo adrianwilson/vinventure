@@ -236,6 +236,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vinventure_test
           JWT_SECRET: test-secret
+          STRIPE_SECRET_KEY: sk_test_placeholder
           NODE_ENV: test
 
       - name: Upload Backend Build Artifacts
@@ -348,7 +349,7 @@ jobs:
         if: needs.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
         working-directory: lambda
         run: |
-          zip -r function.zip dist/ node_modules/ package.json
+          zip -r function.zip dist/ node_modules/ package.json prisma/
           aws lambda update-function-code --function-name ${{ secrets.STAGING_LAMBDA_FUNCTION_NAME }} --zip-file fileb://function.zip
 
   # Deploy to Production (main branch)
