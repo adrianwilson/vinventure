@@ -78,7 +78,7 @@ export default function WineryAdminPage() {
               </div>
               <h3 className="mt-4 text-lg font-medium text-gray-900">Access Denied</h3>
               <p className="mt-2 text-sm text-gray-600">
-                You don't have permission to access the Winery Admin dashboard.
+                You don&apos;t have permission to access the Winery Admin dashboard.
                 <br />
                 This page is only available to winery administrators.
               </p>

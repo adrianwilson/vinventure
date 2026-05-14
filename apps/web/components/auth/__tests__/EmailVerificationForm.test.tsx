@@ -108,7 +108,7 @@ describe('EmailVerificationForm', () => {
 
   it('disables buttons while loading', async () => {
     const { useAuth } = require('../../../contexts/AuthContext');
-    const mockConfirmEmail = jest.fn().mockImplementation(() => new Promise(() => {})); // Never resolves
+    const mockConfirmEmail = jest.fn().mockImplementation(() => new Promise(() => { /* intentionally unresolved */ }));
     useAuth.mockReturnValue({
       confirmEmail: mockConfirmEmail,
       signUp: jest.fn(),
