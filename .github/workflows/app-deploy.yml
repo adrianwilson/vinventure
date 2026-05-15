@@ -63,8 +63,8 @@ jobs:
         pnpm run build
       env:
         NEXT_PUBLIC_API_BASE_URL: https://staging-api.vinventure.com
-        NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ secrets.NEXT_PUBLIC_COGNITO_USER_POOL_ID }}
-        NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID }}
+        NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ vars.NEXT_PUBLIC_COGNITO_USER_POOL_ID }}
+        NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID: ${{ vars.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID }}
         NEXT_PUBLIC_AWS_REGION: ${{ env.AWS_REGION }}
 
     - name: Test frontend
@@ -186,8 +186,8 @@ jobs:
         pnpm run build
       env:
         NEXT_PUBLIC_API_BASE_URL: https://staging-api.vinventure.com
-        NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ secrets.NEXT_PUBLIC_COGNITO_USER_POOL_ID }}
-        NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID }}
+        NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ vars.NEXT_PUBLIC_COGNITO_USER_POOL_ID }}
+        NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID: ${{ vars.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID }}
         NEXT_PUBLIC_AWS_REGION: ${{ env.AWS_REGION }}
 
     - name: CDK Bootstrap
@@ -269,8 +269,8 @@ jobs:
         pnpm run build
       env:
         NEXT_PUBLIC_API_BASE_URL: https://api.vinventure.com
-        NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ secrets.NEXT_PUBLIC_COGNITO_USER_POOL_ID }}
-        NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID }}
+        NEXT_PUBLIC_COGNITO_USER_POOL_ID: ${{ vars.NEXT_PUBLIC_COGNITO_USER_POOL_ID }}
+        NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID: ${{ vars.NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID }}
         NEXT_PUBLIC_AWS_REGION: ${{ env.AWS_REGION }}
 
     - name: CDK Bootstrap

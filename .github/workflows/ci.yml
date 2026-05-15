@@ -315,7 +315,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Download Frontend Build
         if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
@@ -327,13 +327,13 @@ jobs:
       - name: Deploy Frontend to S3
         if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         run: |
-          aws s3 sync apps/web/out/ s3://${{ secrets.STAGING_S3_BUCKET }} --delete --cache-control "public,max-age=31536000,immutable" --exclude "*.html" --exclude "*.json"
-          aws s3 sync apps/web/out/ s3://${{ secrets.STAGING_S3_BUCKET }} --delete --cache-control "public,max-age=0,must-revalidate" --include "*.html" --include "*.json"
+          aws s3 sync apps/web/out/ s3://${{ vars.STAGING_S3_BUCKET }} --delete --cache-control "public,max-age=31536000,immutable" --exclude "*.html" --exclude "*.json"
+          aws s3 sync apps/web/out/ s3://${{ vars.STAGING_S3_BUCKET }} --delete --cache-control "public,max-age=0,must-revalidate" --include "*.html" --include "*.json"
 
       - name: Invalidate CloudFront Cache
         if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.STAGING_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+          aws cloudfront create-invalidation --distribution-id ${{ vars.STAGING_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
 
       - name: Download Backend Build
         if: needs.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
@@ -347,7 +347,7 @@ jobs:
         working-directory: lambda
         run: |
           zip -r function.zip dist/ node_modules/ package.json prisma/
-          aws lambda update-function-code --function-name ${{ secrets.STAGING_LAMBDA_FUNCTION_NAME }} --zip-file fileb://function.zip
+          aws lambda update-function-code --function-name ${{ vars.STAGING_LAMBDA_FUNCTION_NAME }} --zip-file fileb://function.zip
 
   # Deploy to Production (main branch)
   deploy-production:
@@ -377,7 +377,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Download Frontend Build
         if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
@@ -389,13 +389,13 @@ jobs:
       - name: Deploy Frontend to S3
         if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         run: |
-          aws s3 sync apps/web/out/ s3://${{ secrets.PRODUCTION_S3_BUCKET }} --delete --cache-control "public,max-age=31536000,immutable" --exclude "*.html" --exclude "*.json"
-          aws s3 sync apps/web/out/ s3://${{ secrets.PRODUCTION_S3_BUCKET }} --delete --cache-control "public,max-age=0,must-revalidate" --include "*.html" --include "*.json"
+          aws s3 sync apps/web/out/ s3://${{ vars.PRODUCTION_S3_BUCKET }} --delete --cache-control "public,max-age=31536000,immutable" --exclude "*.html" --exclude "*.json"
+          aws s3 sync apps/web/out/ s3://${{ vars.PRODUCTION_S3_BUCKET }} --delete --cache-control "public,max-age=0,must-revalidate" --include "*.html" --include "*.json"
 
       - name: Invalidate CloudFront Cache
         if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
         run: |
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.PRODUCTION_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+          aws cloudfront create-invalidation --distribution-id ${{ vars.PRODUCTION_CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
 
       - name: Download Backend Build
         if: needs.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
@@ -409,7 +409,7 @@ jobs:
         working-directory: lambda
         run: |
           zip -r function.zip dist/ node_modules/ package.json prisma/
-          aws lambda update-function-code --function-name ${{ secrets.PRODUCTION_LAMBDA_FUNCTION_NAME }} --zip-file fileb://function.zip
+          aws lambda update-function-code --function-name ${{ vars.PRODUCTION_LAMBDA_FUNCTION_NAME }} --zip-file fileb://function.zip
 
       - name: Run Database Migrations (Production)
         if: needs.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
