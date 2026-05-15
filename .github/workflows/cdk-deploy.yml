@@ -69,6 +69,9 @@ jobs:
           npx cdk bootstrap aws://$(aws sts get-caller-identity --query Account --output text)/${{ env.AWS_REGION }}
         fi
 
+    - name: Ensure frontend build directory exists
+      run: mkdir -p ../../apps/web/out && touch ../../apps/web/out/index.html
+
     - name: CDK Synth
       run: npx cdk synth --all
 
@@ -125,6 +128,9 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
+
+    - name: Ensure frontend build directory exists
+      run: mkdir -p ../../apps/web/out && touch ../../apps/web/out/index.html
 
     - name: CDK Bootstrap
       run: |
@@ -214,6 +220,9 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
+
+    - name: Ensure frontend build directory exists
+      run: mkdir -p ../../apps/web/out && touch ../../apps/web/out/index.html
 
     - name: CDK Bootstrap
       run: |
@@ -326,6 +335,9 @@ jobs:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
+
+    - name: Ensure frontend build directory exists
+      run: mkdir -p ../../apps/web/out && touch ../../apps/web/out/index.html
 
     - name: CDK Destroy
       run: |
