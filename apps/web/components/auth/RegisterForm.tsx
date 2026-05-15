@@ -62,7 +62,7 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
       if (result.confirmationRequired) {
         setRegisteredEmail(formData.email);
         setShowEmailVerification(true);
-        setSuccess('Registration successful! Please check your email for a verification code.');
+        setError('');
       } else {
         // Auto sign in after successful registration
         const user = await signIn(formData.email, formData.password);

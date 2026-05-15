@@ -117,10 +117,9 @@ export default function BookingManagement() {
           
           setBookings(transformedBookings);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch bookings:', error);
-        // Show user-friendly message for API failures
-        if (error.message.includes('Failed to fetch')) {
+        if (error.message?.includes('Failed to fetch')) {
           setApiError('Backend API is not available. Please start the backend server on localhost:3001');
         } else {
           setApiError('Failed to load booking data. Please try again.');
@@ -209,12 +208,14 @@ export default function BookingManagement() {
     switch (dateFilter) {
       case 'today':
         return bookingDate.toDateString() === now.toDateString();
-      case 'week':
+      case 'week': {
         const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
         return bookingDate >= now && bookingDate <= weekFromNow;
-      case 'month':
+      }
+      case 'month': {
         const monthFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
         return bookingDate >= now && bookingDate <= monthFromNow;
+      }
       default:
         return true;
     }

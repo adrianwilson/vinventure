@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Winery, WineryStatus, ExperienceType, WINE_TYPES, EXPERIENCE_TYPE_LABELS } from '../../../types/winery';
+import { Winery, WineryStatus, WINE_TYPES } from '../../../types/winery';
 
 interface WineryFormData {
   name: string;
@@ -21,22 +21,6 @@ interface WineryFormData {
   status: WineryStatus;
 }
 
-interface ExperienceFormData {
-  title: string;
-  description: string;
-  type: ExperienceType;
-  duration: string;
-  price: string;
-  maxGuests: string;
-  availableDays: string[];
-  startTime: string;
-  endTime: string;
-  ageRestriction: string;
-  requirements: string;
-  isActive: boolean;
-}
-
-const DAYS_OF_WEEK = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
 export default function AdminWineriesPage() {
   const [activeTab, setActiveTab] = useState<'list' | 'create' | 'edit'>('list');
@@ -64,23 +48,6 @@ export default function AdminWineriesPage() {
     foundedYear: '',
     status: WineryStatus.PENDING
   });
-
-  const [experienceForm, setExperienceForm] = useState<ExperienceFormData>({
-    title: '',
-    description: '',
-    type: ExperienceType.TASTING,
-    duration: '60',
-    price: '0',
-    maxGuests: '8',
-    availableDays: [],
-    startTime: '10:00',
-    endTime: '17:00',
-    ageRestriction: '',
-    requirements: '',
-    isActive: true
-  });
-
-  const [showExperienceForm, setShowExperienceForm] = useState(false);
 
   useEffect(() => {
     if (activeTab === 'list') {
@@ -162,12 +129,6 @@ export default function AdminWineriesPage() {
     setSuccess('');
 
     try {
-      // TODO: Implement actual API call
-      const wineryData = {
-        ...wineryForm,
-        foundedYear: wineryForm.foundedYear ? parseInt(wineryForm.foundedYear) : null
-      };
-
       if (selectedWinery) {
         setSuccess('Winery updated successfully!');
       } else {

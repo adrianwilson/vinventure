@@ -55,7 +55,7 @@ export default function RoleAssigner({ onRoleUpdated }: RoleAssignerProps) {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.accessToken}`,
+          'Authorization': `Bearer ${user!.accessToken}`,
         },
         body: JSON.stringify({ role: selectedRole }),
         signal: controller.signal,
@@ -70,9 +70,7 @@ export default function RoleAssigner({ onRoleUpdated }: RoleAssignerProps) {
       const result = await response.json();
       setMessage(`✅ ${result.message} - Please refresh the page to see changes.`);
       
-      if (onRoleUpdated) {
-        onRoleUpdated();
-      }
+      onRoleUpdated?.();
     } catch (error: any) {
       console.error('Failed to assign role:', error);
       

@@ -19,7 +19,7 @@ export async function getAppConfig(): Promise<AppConfig> {
     }
     
     configCache = await response.json();
-    return configCache;
+    return configCache!;
   } catch (error) {
     console.error('Failed to load app config:', error);
     // Fallback to environment variables for local development

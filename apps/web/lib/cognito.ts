@@ -33,6 +33,8 @@ const createCognitoClient = () => {
 
 export interface CognitoUser {
   username: string;
+  sub?: string;
+  name?: string;
   email: string;
   attributes: Record<string, string>;
   accessToken: string;
@@ -40,6 +42,7 @@ export interface CognitoUser {
   refreshToken: string;
   role?: 'GUEST' | 'WINERY_ADMIN' | 'PLATFORM_ADMIN';
   displayName?: string;
+  cognitoUid?: string;
 }
 
 export interface SignUpData {

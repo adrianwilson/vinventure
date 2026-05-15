@@ -89,9 +89,9 @@ export default function WineryManagement() {
           setWinery(wineryData);
           setExperiences(wineryData.experiences || []);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch winery data:', error);
-        if (error.message.includes('Failed to fetch')) {
+        if (error.message?.includes('Failed to fetch')) {
           setApiError('Backend API is not available. Please start the backend server on localhost:3001');
         } else {
           setApiError('Failed to load winery data. Please try again.');
@@ -248,7 +248,7 @@ export default function WineryManagement() {
     return (
       <div className="text-center py-8">
         <h3 className="text-lg font-medium text-gray-900 mb-2">No Winery Found</h3>
-        <p className="text-gray-600 mb-4">You don't have a winery registered yet.</p>
+        <p className="text-gray-600 mb-4">You don&apos;t have a winery registered yet.</p>
         <button 
           onClick={() => setEditingWinery(true)}
           className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700"

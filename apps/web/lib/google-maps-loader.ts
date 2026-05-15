@@ -3,14 +3,6 @@ let isLoading = false;
 let isLoaded = false;
 let loadPromise: Promise<void> | null = null;
 
-export interface GoogleMapsWindow extends Window {
-  google?: typeof google;
-}
-
-declare global {
-  interface Window extends GoogleMapsWindow {}
-}
-
 export const loadGoogleMapsAPI = (): Promise<void> => {
   // If already loaded, return immediately
   if (isLoaded && window.google) {

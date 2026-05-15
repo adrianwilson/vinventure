@@ -61,6 +61,7 @@ export interface Winery {
   foundedYear?: number | null;
   wineTypes: string[];
   sustainable: boolean;
+  sustainablePractices?: boolean;
   rating?: number;
   featured?: boolean;
   createdAt: string;
@@ -84,8 +85,9 @@ export interface Experience {
   startTime: string;
   endTime: string;
   ageRestriction?: number;
-  requirements?: string;
-  wineryId: string;
+  images?: string[];
+  requirements?: string | null;
+  wineryId?: string;
   winery?: Winery;
   isActive: boolean;
   createdAt: string;

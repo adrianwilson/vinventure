@@ -9,18 +9,19 @@ yarn-error.log*
 out/
 dist/
 
-# Environment files
-.env
+# Environment files (secrets)
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-
-# Environment files in any subdirectory
 **/.env.local
 **/.env.development.local
 **/.env.test.local
 **/.env.production.local
+
+# Allow .env.*.example files (templates for secrets)
+!**/.env.local.example
+!**/.env.example
 
 # Database
 *.db
@@ -62,8 +63,8 @@ jspm_packages/
 # Yarn Integrity file
 .yarn-integrity
 
-# dotenv environment variables file
-.env
+# dotenv environment variables file (root only)
+/.env
 
 # next.js build output
 .next
@@ -109,10 +110,10 @@ apps/infrastructure/cdk.out/
 # Compiled TypeScript files (exclude config files and scripts)
 *.js
 *.d.ts
+!**/types/*.d.ts
 !*.config.js
 !scripts/*.js
 !mobile/*.js
-!lambda/*.js
 
 # Prisma generated client
 apps/src/generated/
@@ -137,6 +138,6 @@ ios/Pods/
 .expo/
 .expo-shared/
 
-# Lambda builds
-lambda/
+# Lambda build outputs
+lambda/dist/
 lambda-layers/

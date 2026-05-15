@@ -57,7 +57,7 @@ export default function BookingsList() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [isLocal, setIsLocal] = useState(false);
+  const [, setIsLocal] = useState(false);
 
   useEffect(() => {
     const fetchBookings = async () => {
@@ -217,7 +217,7 @@ export default function BookingsList() {
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">No bookings yet</h3>
         <p className="text-gray-600 mb-6">
-          You haven't made any wine experience bookings yet. Discover amazing wineries and book your first experience!
+          You haven&apos;t made any wine experience bookings yet. Discover amazing wineries and book your first experience!
         </p>
         <Link
           href="/discover"

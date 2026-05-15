@@ -63,7 +63,7 @@ export function EmailVerificationForm({
         </div>
         <h2 className="text-2xl font-bold">Check your email</h2>
         <p className="text-gray-600">
-          We've sent a verification code to{' '}
+          We&apos;ve sent a verification code to{' '}
           <span className="font-medium">{email}</span>
         </p>
       </div>
@@ -103,7 +103,7 @@ export function EmailVerificationForm({
 
       <div className="text-center space-y-2">
         <p className="text-sm text-gray-600">
-          Didn't receive the code?
+          Didn&apos;t receive the code?
         </p>
         {onResendCode && (
           <button

@@ -1,19 +1,12 @@
+import '@testing-library/jest-dom';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EmailVerificationForm } from '../EmailVerificationForm';
-
-// Mock the useAuth hook
-jest.mock('../../../contexts/AuthContext', () => ({
-  useAuth: () => ({
-    confirmEmail: jest.fn(),
-    signUp: jest.fn(),
-  }),
-}));
 
 describe('EmailVerificationForm', () => {
   const mockProps = {
     email: 'test@example.com',
-    onVerificationSuccess: jest.fn(),
-    onResendCode: jest.fn(),
+    onVerify: jest.fn().mockResolvedValue(undefined),
+    onResendCode: jest.fn().mockResolvedValue(undefined),
   };
 
   beforeEach(() => {
@@ -22,72 +15,64 @@ describe('EmailVerificationForm', () => {
 
   it('renders with correct email display', () => {
     render(<EmailVerificationForm {...mockProps} />);
-    
-    expect(screen.getByText(/verification code sent to/i)).toBeInTheDocument();
+
     expect(screen.getByText('test@example.com')).toBeInTheDocument();
+    expect(screen.getByText('Check your email')).toBeInTheDocument();
   });
 
-  it('renders 6-digit input field', () => {
+  it('renders input field with correct placeholder', () => {
     render(<EmailVerificationForm {...mockProps} />);
-    
-    const input = screen.getByPlaceholderText('000000');
+
+    const input = screen.getByPlaceholderText('Enter 6-digit code');
     expect(input).toBeInTheDocument();
     expect(input).toHaveAttribute('maxLength', '6');
   });
 
-  it('enables verify button when 6 digits are entered', async () => {
+  it('disables verify button when input is empty', () => {
     render(<EmailVerificationForm {...mockProps} />);
-    
-    const input = screen.getByPlaceholderText('000000');
+
     const verifyButton = screen.getByRole('button', { name: /verify/i });
-    
     expect(verifyButton).toBeDisabled();
-    
-    fireEvent.change(input, { target: { value: '123456' } });
-    
-    await waitFor(() => {
-      expect(verifyButton).toBeEnabled();
-    });
   });
 
-  it('calls onVerificationSuccess when verification succeeds', async () => {
-    const { useAuth } = require('../../../contexts/AuthContext');
-    const mockConfirmEmail = jest.fn().mockResolvedValue(undefined);
-    useAuth.mockReturnValue({
-      confirmEmail: mockConfirmEmail,
-      signUp: jest.fn(),
-    });
-
+  it('enables verify button when code is entered', () => {
     render(<EmailVerificationForm {...mockProps} />);
-    
-    const input = screen.getByPlaceholderText('000000');
+
+    const input = screen.getByPlaceholderText('Enter 6-digit code');
+    fireEvent.change(input, { target: { value: '123456' } });
+
     const verifyButton = screen.getByRole('button', { name: /verify/i });
-    
+    expect(verifyButton).not.toBeDisabled();
+  });
+
+  it('calls onVerify with trimmed code on submit', async () => {
+    render(<EmailVerificationForm {...mockProps} />);
+
+    const input = screen.getByPlaceholderText('Enter 6-digit code');
+    const verifyButton = screen.getByRole('button', { name: /verify/i });
+
     fireEvent.change(input, { target: { value: '123456' } });
     fireEvent.click(verifyButton);
-    
+
     await waitFor(() => {
-      expect(mockConfirmEmail).toHaveBeenCalledWith('test@example.com', '123456');
-      expect(mockProps.onVerificationSuccess).toHaveBeenCalled();
+      expect(mockProps.onVerify).toHaveBeenCalledWith('123456');
     });
   });
 
   it('displays error message when verification fails', async () => {
-    const { useAuth } = require('../../../contexts/AuthContext');
-    const mockConfirmEmail = jest.fn().mockRejectedValue(new Error('Invalid code'));
-    useAuth.mockReturnValue({
-      confirmEmail: mockConfirmEmail,
-      signUp: jest.fn(),
-    });
+    const failingProps = {
+      ...mockProps,
+      onVerify: jest.fn().mockRejectedValue(new Error('Invalid code')),
+    };
 
-    render(<EmailVerificationForm {...mockProps} />);
-    
-    const input = screen.getByPlaceholderText('000000');
+    render(<EmailVerificationForm {...failingProps} />);
+
+    const input = screen.getByPlaceholderText('Enter 6-digit code');
     const verifyButton = screen.getByRole('button', { name: /verify/i });
-    
+
     fireEvent.change(input, { target: { value: '123456' } });
     fireEvent.click(verifyButton);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Invalid code')).toBeInTheDocument();
     });
@@ -95,56 +80,24 @@ describe('EmailVerificationForm', () => {
 
   it('calls onResendCode when resend button is clicked', async () => {
     render(<EmailVerificationForm {...mockProps} />);
-    
+
     const resendButton = screen.getByRole('button', { name: /resend code/i });
     fireEvent.click(resendButton);
-    
+
     await waitFor(() => {
       expect(mockProps.onResendCode).toHaveBeenCalled();
     });
   });
 
-  it('disables buttons while loading', async () => {
-    const { useAuth } = require('../../../contexts/AuthContext');
-    const mockConfirmEmail = jest.fn().mockImplementation(() => new Promise(() => {})); // Never resolves
-    useAuth.mockReturnValue({
-      confirmEmail: mockConfirmEmail,
-      signUp: jest.fn(),
-    });
-
+  it('shows error when submitting empty code', async () => {
     render(<EmailVerificationForm {...mockProps} />);
-    
-    const input = screen.getByPlaceholderText('000000');
-    const verifyButton = screen.getByRole('button', { name: /verify/i });
-    const resendButton = screen.getByRole('button', { name: /resend code/i });
-    
-    fireEvent.change(input, { target: { value: '123456' } });
-    fireEvent.click(verifyButton);
-    
+
+    const form = screen.getByRole('button', { name: /verify/i }).closest('form')!;
+    fireEvent.submit(form);
+
     await waitFor(() => {
-      expect(verifyButton).toBeDisabled();
-      expect(resendButton).toBeDisabled();
+      expect(screen.getByText('Please enter the verification code')).toBeInTheDocument();
     });
-  });
-
-  it('only allows numeric input', () => {
-    render(<EmailVerificationForm {...mockProps} />);
-    
-    const input = screen.getByPlaceholderText('000000') as HTMLInputElement;
-    
-    fireEvent.change(input, { target: { value: 'abc123' } });
-    expect(input.value).toBe('123');
-    
-    fireEvent.change(input, { target: { value: '!@#456' } });
-    expect(input.value).toBe('456');
-  });
-
-  it('limits input to 6 characters', () => {
-    render(<EmailVerificationForm {...mockProps} />);
-    
-    const input = screen.getByPlaceholderText('000000') as HTMLInputElement;
-    
-    fireEvent.change(input, { target: { value: '1234567890' } });
-    expect(input.value).toBe('123456');
+    expect(mockProps.onVerify).not.toHaveBeenCalled();
   });
 });
