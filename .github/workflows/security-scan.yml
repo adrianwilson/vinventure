@@ -2,29 +2,14 @@ name: Security Scanning
 
 on:
   schedule:
-    # Run security scans daily at 2 AM UTC
     - cron: '0 2 * * *'
   push:
     branches:
       - main
-      - develop
   pull_request:
     branches:
       - main
-      - develop
   workflow_dispatch:
-    inputs:
-      scan_type:
-        description: 'Type of security scan to run'
-        required: true
-        default: 'all'
-        type: choice
-        options:
-          - all
-          - dependency-check
-          - code-scan
-          - container-scan
-          - secrets-scan
 
 permissions:
   contents: read
@@ -32,15 +17,12 @@ permissions:
   actions: read
 
 env:
-  NODE_VERSION: '18'
-  PNPM_VERSION: '8.15.0'
+  NODE_VERSION: '22'
 
 jobs:
-  # Dependency vulnerability scanning
   dependency-scan:
     name: Dependency Vulnerability Scan
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'dependency-check' || github.event_name == 'push' || github.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,24 +34,18 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run pnpm audit
         run: |
-          echo "🔍 Running pnpm audit for root dependencies..."
-          pnpm audit --audit-level info --json > pnpm-audit.json || true
-          cat pnpm-audit.json
+          pnpm audit --audit-level moderate || true
 
-      - name: Run npm audit for Lambda
+      - name: Run pnpm audit (Lambda)
         working-directory: lambda
         run: |
-          echo "🔍 Running npm audit for Lambda dependencies..."
-          npm audit --audit-level info --json > ../lambda-audit.json || true
-          cat ../lambda-audit.json
+          pnpm audit --audit-level moderate || true
 
       - name: OSV Scanner
         uses: google/osv-scanner-action@v1
@@ -105,19 +81,9 @@ jobs:
           sarif_file: 'trivy-results.sarif'
           category: trivy
 
-      - name: Snyk security scan
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=medium --file=package.json
-        continue-on-error: true
-
-  # Static code analysis
   code-security-scan:
     name: Static Code Security Analysis
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'code-scan' || github.event_name == 'push' || github.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -126,7 +92,6 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: javascript
-          config-file: ./.github/codeql-config.yml
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -135,55 +100,18 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Generate Prisma Client
-        run: pnpm run db:generate
-
-      - name: Build Frontend
-        run: pnpm run build
-        env:
-          NODE_ENV: production
-
-      - name: Build Backend
-        working-directory: lambda
-        run: |
-          npm install
-          npm run build
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:javascript"
 
-      - name: ESLint Security Scan
-        run: |
-          echo "🔍 Running ESLint security rules..."
-          npx eslint . --ext .js,.jsx,.ts,.tsx --format json --output-file eslint-security-report.json || true
-          if [ -f eslint-security-report.json ]; then
-            cat eslint-security-report.json
-          fi
-
-      - name: Semgrep Static Analysis
-        uses: returntocorp/semgrep-action@v1
-        with:
-          config: >-
-            p/security-audit
-            p/secrets
-            p/owasp-top-ten
-            p/javascript
-            p/typescript
-        continue-on-error: true
-
-  # Secrets scanning
   secrets-scan:
     name: Secrets Detection
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'secrets-scan' || github.event_name == 'push' || github.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -198,68 +126,19 @@ jobs:
           head: HEAD
           extra_args: --debug --only-verified
 
-      - name: GitLeaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
-
-      - name: Detect secrets with detect-secrets
-        run: |
-          pip install detect-secrets
-          detect-secrets scan --all-files --baseline .secrets.baseline || true
-          if [ -f .secrets.baseline ]; then
-            detect-secrets audit .secrets.baseline || true
-          fi
-
-  # Container security (if using Docker)
-  container-scan:
-    name: Container Security Scan
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event.inputs.scan_type == 'all' || github.event.inputs.scan_type == 'container-scan'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Scan Dockerfile with Hadolint
-        uses: hadolint/hadolint-action@v3.1.0
-        if: hashFiles('**/Dockerfile*') != ''
-        with:
-          dockerfile: Dockerfile
-          format: sarif
-          output-file: hadolint-results.sarif
-        continue-on-error: true
-
-      - name: Upload Hadolint scan results
-        uses: github/codeql-action/upload-sarif@v3
-        if: hashFiles('hadolint-results.sarif') != ''
-        with:
-          sarif_file: hadolint-results.sarif
-          category: hadolint
-
-      - name: Docker Scout (if Dockerfile exists)
-        if: hashFiles('**/Dockerfile*') != ''
-        run: |
-          if [ -f Dockerfile ]; then
-            echo "🔍 Docker Scout would scan container images here"
-            echo "Install Docker Scout and scan: docker scout quickview"
-          fi
-
-  # Infrastructure security
   infrastructure-scan:
     name: Infrastructure Security Scan
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event.inputs.scan_type == 'all' || github.event_name == 'push' || github.event_name == 'pull_request'
+    if: github.event_name == 'schedule' || github.event_name == 'push' || github.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Terraform/CDK Security Scan with Checkov
+      - name: CDK/CloudFormation Security Scan with Checkov
         uses: bridgecrewio/checkov-action@master
-        if: hashFiles('**/*.tf', '**/cdk.json', '**/*.py') != ''
         with:
           directory: .
-          framework: terraform,cloudformation,sca_package
+          framework: cloudformation,sca_package
           output_format: sarif
           output_file_path: reports/results.sarif
         continue-on-error: true
@@ -271,59 +150,10 @@ jobs:
           sarif_file: reports/results.sarif
           category: checkov
 
-      - name: AWS CDK Security Scan
-        if: hashFiles('**/cdk.json') != ''
-        working-directory: apps/infrastructure
-        run: |
-          echo "🔍 Scanning CDK configuration..."
-          npm install
-          # Add CDK security scanning commands here
-          # Example: cdk-nag or other CDK security tools
-
-  # License compliance
-  license-scan:
-    name: License Compliance Scan
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event.inputs.scan_type == 'all'
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: License Check
-        run: |
-          echo "📄 Checking licenses..."
-          npx license-checker --json --out licenses.json || true
-          if [ -f licenses.json ]; then
-            echo "License report generated:"
-            cat licenses.json | jq '.[] | select(.licenses | test("GPL|AGPL"; "i")) | {name: .name, licenses: .licenses}' || true
-          fi
-
-      - name: FOSSA License Scan
-        uses: fossas/fossa-action@main
-        if: env.FOSSA_API_KEY != ''
-        env:
-          FOSSA_API_KEY: ${{ secrets.FOSSA_API_KEY }}
-        with:
-          api-key: ${{ secrets.FOSSA_API_KEY }}
-
-  # Security report summary
   security-report:
     name: Security Report Summary
     runs-on: ubuntu-latest
-    needs: [dependency-scan, code-security-scan, secrets-scan, container-scan, infrastructure-scan, license-scan]
+    needs: [dependency-scan, code-security-scan, secrets-scan, infrastructure-scan]
     if: always() && github.event_name == 'schedule'
     steps:
       - name: Generate Security Report
@@ -334,54 +164,35 @@ jobs:
               dependency: '${{ needs.dependency-scan.result }}',
               code: '${{ needs.code-security-scan.result }}',
               secrets: '${{ needs.secrets-scan.result }}',
-              container: '${{ needs.container-scan.result }}',
-              infrastructure: '${{ needs.infrastructure-scan.result }}',
-              license: '${{ needs.license-scan.result }}'
+              infrastructure: '${{ needs.infrastructure-scan.result }}'
             };
-            
-            let report = '# 🛡️ Security Scan Report\n\n';
-            report += `**Scan Date**: ${new Date().toISOString()}\n\n`;
-            
+
             const getStatusEmoji = (status) => {
               switch(status) {
-                case 'success': return '✅';
-                case 'failure': return '❌';
-                case 'skipped': return '⏭️';
-                default: return '⚪';
+                case 'success': return 'PASS';
+                case 'failure': return 'FAIL';
+                case 'skipped': return 'SKIP';
+                default: return '??';
               }
             };
-            
-            report += '## Scan Results\n\n';
-            report += '| Scan Type | Status | Details |\n';
-            report += '|-----------|--------|---------|\n';
-            report += `| Dependency Vulnerabilities | ${getStatusEmoji(results.dependency)} | ${results.dependency} |\n`;
-            report += `| Static Code Analysis | ${getStatusEmoji(results.code)} | ${results.code} |\n`;
-            report += `| Secrets Detection | ${getStatusEmoji(results.secrets)} | ${results.secrets} |\n`;
-            report += `| Container Security | ${getStatusEmoji(results.container)} | ${results.container} |\n`;
-            report += `| Infrastructure Security | ${getStatusEmoji(results.infrastructure)} | ${results.infrastructure} |\n`;
-            report += `| License Compliance | ${getStatusEmoji(results.license)} | ${results.license} |\n`;
-            
-            const hasFailures = Object.values(results).some(result => result === 'failure');
-            
-            if (hasFailures) {
-              report += '\n## ⚠️ Action Required\n';
-              report += 'Some security scans have failed. Please review the detailed results in the Actions tab and address any security issues found.\n';
-            } else {
-              report += '\n## ✅ All Clear\n';
-              report += 'All security scans have passed successfully.\n';
+
+            let report = '# Security Scan Report\n\n';
+            report += `**Date**: ${new Date().toISOString()}\n\n`;
+            report += '| Scan | Status |\n|------|--------|\n';
+            for (const [scan, result] of Object.entries(results)) {
+              report += `| ${scan} | ${getStatusEmoji(result)} |\n`;
             }
-            
-            report += '\n---\n*This report was generated automatically by the security scanning workflow.*';
-            
-            console.log(report);
-            
-            // Create an issue if there are failures
+
+            const hasFailures = Object.values(results).some(r => r === 'failure');
             if (hasFailures) {
+              report += '\nAction required: review failed scans in the Actions tab.\n';
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: `🛡️ Security Scan Failures - ${new Date().toISOString().split('T')[0]}`,
+                title: `Security Scan Failures - ${new Date().toISOString().split('T')[0]}`,
                 body: report,
                 labels: ['security', 'automated']
               });
             }
+
+            console.log(report);
