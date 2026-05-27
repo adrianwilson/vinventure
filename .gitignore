@@ -141,3 +141,6 @@ ios/Pods/
 # Lambda build outputs
 lambda/dist/
 lambda-layers/
+# GStack skills (installed locally)
+.claude/skills/
+.claude/skills/gstack/
