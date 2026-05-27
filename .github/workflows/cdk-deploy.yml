@@ -29,7 +29,7 @@ on:
 
 env:
   AWS_REGION: ca-central-1
-  NODE_VERSION: '18'
+  NODE_VERSION: '22'
 
 jobs:
   # CDK Diff and Validation
@@ -133,9 +133,11 @@ jobs:
       run: pnpm run build:static
       working-directory: .
 
-    - name: CDK Bootstrap
+    - name: CDK Bootstrap (if needed)
       run: |
-        npx cdk bootstrap aws://$(aws sts get-caller-identity --query Account --output text)/${{ env.AWS_REGION }}
+        if ! aws cloudformation describe-stacks --stack-name CDKToolkit --region ${{ env.AWS_REGION }} 2>/dev/null; then
+          npx cdk bootstrap aws://$(aws sts get-caller-identity --query Account --output text)/${{ env.AWS_REGION }}
+        fi
 
     - name: CDK Deploy Staging
       run: |
@@ -189,16 +191,15 @@ jobs:
         echo "Frontend URL: $STAGING_FRONTEND_URL"
         echo "API URL: $STAGING_API_URL"
 
-  # Deploy to Production
+  # Deploy to Production (gated by environment protection rules)
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && vars.AWS_ENABLED == 'true'
     defaults:
       run:
         working-directory: ./apps/infrastructure
     environment: production
-    needs: []
 
     steps:
     - name: Checkout code
@@ -226,9 +227,11 @@ jobs:
       run: pnpm run build:static
       working-directory: .
 
-    - name: CDK Bootstrap
+    - name: CDK Bootstrap (if needed)
       run: |
-        npx cdk bootstrap aws://$(aws sts get-caller-identity --query Account --output text)/${{ env.AWS_REGION }}
+        if ! aws cloudformation describe-stacks --stack-name CDKToolkit --region ${{ env.AWS_REGION }} 2>/dev/null; then
+          npx cdk bootstrap aws://$(aws sts get-caller-identity --query Account --output text)/${{ env.AWS_REGION }}
+        fi
 
     - name: CDK Deploy Production
       run: |
