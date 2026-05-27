@@ -8,12 +8,9 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
-import * as ssm from 'aws-cdk-lib/aws-ssm';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
-import * as s3notifications from 'aws-cdk-lib/aws-s3-notifications';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
-import { CloudFrontToS3 } from '@aws-solutions-constructs/aws-cloudfront-s3';
 import { Construct } from 'constructs';
 
 export class VinventureLambdaStack extends cdk.Stack {
@@ -176,7 +173,7 @@ export class VinventureLambdaStack extends cdk.Stack {
       ],
     });
 
-    // IAM roles for authenticated users
+    // IAM roles for authenticated users (least-privilege: only API Gateway access)
     const authenticatedRole = new iam.Role(this, 'VinventureAuthenticatedRole', {
       assumedBy: new iam.FederatedPrincipal(
         'cognito-identity.amazonaws.com',
@@ -190,9 +187,6 @@ export class VinventureLambdaStack extends cdk.Stack {
         },
         'sts:AssumeRoleWithWebIdentity'
       ),
-      managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonCognitoPowerUser'),
-      ],
     });
 
     // Attach the role to the identity pool
@@ -203,32 +197,30 @@ export class VinventureLambdaStack extends cdk.Stack {
       },
     });
 
-    const noBlock = new s3.BlockPublicAccess({
-      blockPublicAcls: false,
-      ignorePublicAcls: false,
-      blockPublicPolicy: false,
-      restrictPublicBuckets: false,
-    });
-
     const websiteBucket = new s3.Bucket(this, 'VinventureWebsiteBucket', {
-      websiteIndexDocument: 'index.html',
-      websiteErrorDocument: 'index.html', // only if fallback needed
-      publicReadAccess: true, // must be true when using website endpoint
-      blockPublicAccess: noBlock,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: true,
     });
 
-    const origin = new origins.HttpOrigin(`${websiteBucket.bucketWebsiteDomainName}`, {
-      protocolPolicy: cloudfront.OriginProtocolPolicy.HTTP_ONLY, // website endpoint only supports HTTP
-    });
-    
     const distribution = new cloudfront.Distribution(this, 'VinventureDistribution', {
       defaultBehavior: {
-        origin,
+        origin: origins.S3BucketOrigin.withOriginAccessControl(websiteBucket),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
       defaultRootObject: 'index.html',
+      errorResponses: [
+        {
+          httpStatus: 403,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+        },
+        {
+          httpStatus: 404,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+        },
+      ],
     });
 
 
