@@ -12,6 +12,7 @@ interface AuthContextType {
   confirmEmail: (email: string, code: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  confirmResetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
   refreshSession: () => Promise<void>;
 }
 
@@ -31,6 +32,7 @@ export function useAuth() {
         confirmEmail: async () => { throw new Error('Cannot confirm email during SSR'); },
         signOut: async () => { throw new Error('Cannot sign out during SSR'); },
         resetPassword: async () => { throw new Error('Cannot reset password during SSR'); },
+        confirmResetPassword: async () => { throw new Error('Cannot confirm reset during SSR'); },
         refreshSession: async () => { throw new Error('Cannot refresh session during SSR'); },
       } as AuthContextType;
     }
@@ -136,6 +138,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return CognitoAuthService.forgotPassword(email);
   };
 
+  const confirmResetPassword = async (email: string, code: string, newPassword: string): Promise<void> => {
+    return CognitoAuthService.confirmForgotPassword(email, code, newPassword);
+  };
+
   const refreshSession = async (): Promise<void> => {
     if (typeof window === 'undefined') {
       throw new Error('Cannot refresh session during server-side rendering');
@@ -173,6 +179,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     confirmEmail,
     signOut,
     resetPassword,
+    confirmResetPassword,
     refreshSession,
   };
 
