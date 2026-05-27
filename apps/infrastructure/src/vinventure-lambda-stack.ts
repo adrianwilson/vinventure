@@ -121,6 +121,11 @@ export class VinventureLambdaStack extends cdk.Stack {
         requireDigits: true,
         requireSymbols: false,
       },
+      userVerification: {
+        emailSubject: 'Verify your VinVenture account',
+        emailBody: 'Welcome to VinVenture! Your verification code is {####}',
+        emailStyle: cognito.VerificationEmailStyle.CODE,
+      },
       accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
       removalPolicy: isProduction 
         ? cdk.RemovalPolicy.RETAIN 
