@@ -165,7 +165,9 @@ export class VinventureLambdaStack extends cdk.Stack {
       ],
     });
 
-    // Cognito User Pool Client -- callback URLs include CloudFront distribution
+    // Cognito User Pool Client
+    // Note: CloudFront callback URL must be added post-deploy to avoid circular dependency
+    // (distribution -> api -> lambda -> userPoolClient -> distribution)
     const userPoolClient = new cognito.UserPoolClient(this, 'VinventureUserPoolClient', {
       userPool,
       userPoolClientName: 'VinVenture Web Client',
@@ -185,11 +187,9 @@ export class VinventureLambdaStack extends cdk.Stack {
         ],
         callbackUrls: [
           'http://localhost:3000/auth/callback',
-          `https://${distribution.domainName}/auth/callback`,
         ],
         logoutUrls: [
           'http://localhost:3000/',
-          `https://${distribution.domainName}/`,
         ],
       },
       refreshTokenValidity: cdk.Duration.days(30),
@@ -249,11 +249,10 @@ export class VinventureLambdaStack extends cdk.Stack {
     const dbHost = database.clusterEndpoint.hostname;
     const dbPort = database.clusterEndpoint.port.toString();
 
-    // Environment-specific CORS origins
-    const corsOrigins = [
-      'http://localhost:3000',
-      `https://${distribution.domainName}`,
-    ];
+    // CORS origins -- CloudFront domain added post-deploy to avoid circular dependency
+    const corsOrigins = isProduction
+      ? ['https://vinventure.com', 'https://www.vinventure.com']
+      : ['http://localhost:3000', 'https://*.cloudfront.net'];
 
     // Lambda environment variables
     const lambdaEnvironment = {
