@@ -23,7 +23,7 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
 
     try {
       await resetPassword(email);
-      setMessage('Check your email for password reset instructions');
+      setMessage('Check your email for your password reset code');
     } catch (err: any) {
       setError(err.message || 'Failed to send reset email');
     } finally {
@@ -36,7 +36,7 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Reset Password</h2>
         <p className="mt-2 text-sm text-gray-600">
-          Enter your email address and we&apos;ll send you a link to reset your password.
+          Enter your email address and we&apos;ll send you a code to reset your password.
         </p>
       </div>
 
@@ -73,7 +73,7 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
           disabled={loading}
           className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Sending...' : 'Send Reset Link'}
+          {loading ? 'Sending...' : 'Send Reset Code'}
         </button>
 
         {onBack && (
