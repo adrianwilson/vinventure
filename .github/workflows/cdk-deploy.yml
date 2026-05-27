@@ -129,8 +129,9 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Ensure frontend build directory exists
-      run: mkdir -p ../../apps/web/out && touch ../../apps/web/out/index.html
+    - name: Build Frontend
+      run: pnpm run build:static
+      working-directory: .
 
     - name: CDK Bootstrap
       run: |
@@ -221,8 +222,9 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Ensure frontend build directory exists
-      run: mkdir -p ../../apps/web/out && touch ../../apps/web/out/index.html
+    - name: Build Frontend
+      run: pnpm run build:static
+      working-directory: .
 
     - name: CDK Bootstrap
       run: |
