@@ -21,7 +21,7 @@ export class VinventureLambdaStack extends cdk.Stack {
     const environment = this.node.tryGetContext('environment') || 'dev';
     const isProduction = environment === 'production';
 
-    // VPC for database and Lambda
+    // VPC for database and Lambda (matches existing production subnet layout)
     const vpc = new ec2.Vpc(this, 'VinventureVpc', {
       maxAzs: 2,
       natGateways: 1,
@@ -30,11 +30,6 @@ export class VinventureLambdaStack extends cdk.Stack {
           cidrMask: 24,
           name: 'Public',
           subnetType: ec2.SubnetType.PUBLIC,
-        },
-        {
-          cidrMask: 24,
-          name: 'Private',
-          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
         },
         {
           cidrMask: 24,
@@ -98,16 +93,8 @@ export class VinventureLambdaStack extends cdk.Stack {
       serverlessV2MinCapacity: 0,
       serverlessV2MaxCapacity: isProduction ? 16 : 4,
       monitoringInterval: cdk.Duration.seconds(60),
+      enableDataApi: true,
     });
-
-    // Security group for Lambda to access Aurora
-    const lambdaSg = new ec2.SecurityGroup(this, 'LambdaSecurityGroup', {
-      vpc,
-      description: 'Security group for Lambda functions',
-      allowAllOutbound: true,
-    });
-
-    database.connections.allowFrom(lambdaSg, ec2.Port.tcp(5432), 'Lambda to Aurora');
 
     // AWS Cognito User Pool for Authentication
     const userPool = new cognito.UserPool(this, 'VinventureUserPool', {
@@ -237,13 +224,26 @@ export class VinventureLambdaStack extends cdk.Stack {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName(
-          'service-role/AWSLambdaVPCAccessExecutionRole'
+          'service-role/AWSLambdaBasicExecutionRole'
         ),
       ],
     });
 
     databaseSecret.grantRead(lambdaRole);
     stripeSecret.grantRead(lambdaRole);
+
+    // Grant Lambda access to Aurora Data API
+    lambdaRole.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'rds-data:ExecuteStatement',
+        'rds-data:BatchExecuteStatement',
+        'rds-data:BeginTransaction',
+        'rds-data:CommitTransaction',
+        'rds-data:RollbackTransaction',
+      ],
+      resources: [database.clusterArn],
+    }));
 
     // Construct DATABASE_URL from the secret for Prisma
     const dbHost = database.clusterEndpoint.hostname;
@@ -270,7 +270,7 @@ export class VinventureLambdaStack extends cdk.Stack {
       CORS_ALLOWED_ORIGINS: corsOrigins.join(','),
     };
 
-    // API Lambda Function
+    // API Lambda Function (outside VPC, uses Data API for Aurora access)
     const apiFunction = new lambda.Function(this, 'VinventureApiFunction', {
       runtime: lambda.Runtime.NODEJS_22_X,
       code: lambda.Code.fromAsset('../../lambda'),
@@ -279,9 +279,6 @@ export class VinventureLambdaStack extends cdk.Stack {
       memorySize: isProduction ? 1024 : 512,
       environment: lambdaEnvironment,
       role: lambdaRole,
-      vpc,
-      vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS },
-      securityGroups: [lambdaSg],
     });
 
     // API Gateway with environment-specific CORS
