@@ -59,17 +59,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Download Frontend Build
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-build
-          path: apps/web/out
-        continue-on-error: true
-
-      - name: Build Frontend (if no artifact)
-        if: steps.download-frontend.outcome == 'failure'
-        run: pnpm run build:static
-        working-directory: .
+      - name: Build Frontend
+        run: |
+          cd ${{ github.workspace }}
+          pnpm run build:static
 
       - name: CDK Bootstrap (if needed)
         run: |
