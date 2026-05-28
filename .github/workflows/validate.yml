@@ -1,0 +1,257 @@
+name: Validate
+
+on:
+  workflow_call:
+    outputs:
+      frontend-changed:
+        value: ${{ jobs.changes.outputs.frontend }}
+      backend-changed:
+        value: ${{ jobs.changes.outputs.backend }}
+      infrastructure-changed:
+        value: ${{ jobs.changes.outputs.infrastructure }}
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.changes.outputs.frontend }}
+      backend: ${{ steps.changes.outputs.backend }}
+      infrastructure: ${{ steps.changes.outputs.infrastructure }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect Changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            frontend:
+              - 'apps/web/**'
+              - 'libs/**'
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+              - 'nx.json'
+              - 'tsconfig.base.json'
+            backend:
+              - 'lambda/**'
+              - 'libs/database/**'
+              - 'libs/shared/**'
+            infrastructure:
+              - 'apps/infrastructure/**'
+              - 'lambda/**'
+
+  setup:
+    name: Setup Dependencies
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            apps/web/node_modules
+            lambda/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    needs: [changes, setup]
+    if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Restore node_modules cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            apps/web/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies (if cache miss)
+        run: pnpm install
+
+      - name: TypeScript Check
+        run: pnpm run type-check
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Run Tests
+        run: pnpm run test
+        env:
+          CI: true
+
+      - name: Build Frontend
+        run: pnpm run build:static
+        env:
+          NODE_ENV: production
+
+      - name: Upload Frontend Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: apps/web/out
+          retention-days: 7
+
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    needs: [changes, setup]
+    if: needs.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: vinventure_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Restore node_modules cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            lambda/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies (if cache miss)
+        run: pnpm install
+
+      - name: Install Lambda Dependencies
+        working-directory: lambda
+        run: pnpm install
+
+      - name: Generate Prisma Client
+        working-directory: lambda
+        run: npx prisma generate
+
+      - name: Run Database Migrations
+        working-directory: lambda
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vinventure_test
+
+      - name: TypeScript Check
+        working-directory: lambda
+        run: npx tsc --noEmit
+
+      - name: Build Backend
+        working-directory: lambda
+        run: pnpm run build
+
+      - name: Run Tests
+        working-directory: lambda
+        run: pnpm test
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/vinventure_test
+          JWT_SECRET: test-secret
+          STRIPE_SECRET_KEY: test-stripe-key-not-real
+          NODE_ENV: test
+
+      - name: Upload Backend Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build
+          path: lambda/dist
+          retention-days: 7
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: [changes, setup]
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run pnpm audit
+        run: pnpm audit --audit-level moderate
+        continue-on-error: true
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && hashFiles('trivy-results.sarif') != ''
+        with:
+          sarif_file: 'trivy-results.sarif'
