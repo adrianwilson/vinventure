@@ -25,7 +25,7 @@
     "@react-native-community/cli": "~15.0.1",
     "@react-native-community/cli-platform-android": "~15.0.1",
     "@react-native-community/cli-platform-ios": "~15.0.1",
-    "@react-native/babel-preset": "~0.76.3",
+    "@react-native/babel-preset": "~0.85.3",
     "@react-native/metro-config": "~0.76.3",
     "@testing-library/jest-native": "~5.4.3",
     "@testing-library/react-native": "~12.9.0",
