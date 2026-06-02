@@ -41,3 +41,28 @@ Do not skip skills, ignore gstack errors, or work around missing gstack.
 Using gstack skills: After install, skills like /qa, /ship, /review, /investigate,
 and /browse are available. Use /browse for all web browsing.
 Use ~/.claude/skills/gstack/... for gstack file paths (the global path).
+
+## Dependency Management
+
+**Nx is the source of truth for toolchain versions.** Do not merge individual Dependabot
+PRs for Nx-managed dependencies (TypeScript, Jest, Vite, ESLint, Playwright, React Native).
+Instead, use `nx migrate` which handles coordinated upgrades across the ecosystem.
+
+### Quarterly Nx Upgrade
+
+Run quarterly (or when Dependabot PRs pile up):
+
+```bash
+npx nx migrate latest        # generates package.json changes + migrations.json
+pnpm install                  # install updated deps
+npx nx migrate --run-migrations  # run migration scripts
+rm migrations.json            # cleanup
+```
+
+Test after: `npx jest --ci` (frontend), `pnpm test` (backend), `pnpm run build:static` (build).
+
+### Dependabot Policy
+
+- **Close PRs for Nx-managed deps** (anything @nx/*, typescript, jest, vite, eslint, playwright)
+- **Merge PRs for non-Nx deps** (NestJS, Prisma, Stripe, AWS SDK, application-level deps)
+- **Always merge security patches** regardless of category
