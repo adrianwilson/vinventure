@@ -121,7 +121,6 @@ jobs:
 
       - name: Lint
         run: pnpm run lint
-        continue-on-error: true
 
       - name: Run Tests
         run: pnpm run test
