@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 
 interface FavoritesContextType {
@@ -29,17 +29,7 @@ export function FavoritesProvider({ children }: FavoritesProviderProps) {
   const [favoriteWineryIds, setFavoriteWineryIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Load user's favorites when they sign in
-  useEffect(() => {
-    if (user) {
-      loadUserFavorites();
-    } else {
-      // Clear favorites when user signs out
-      setFavoriteWineryIds([]);
-    }
-  }, [user]);
-
-  const loadUserFavorites = async () => {
+  const loadUserFavorites = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
@@ -61,7 +51,17 @@ export function FavoritesProvider({ children }: FavoritesProviderProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  // Load user's favorites when they sign in
+  useEffect(() => {
+    if (user) {
+      loadUserFavorites();
+    } else {
+      // Clear favorites when user signs out
+      setFavoriteWineryIds([]);
+    }
+  }, [user, loadUserFavorites]);
 
   const saveFavoritesToStorage = (favorites: string[]) => {
     if (user) {

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Winery, Experience, EXPERIENCE_TYPE_LABELS } from '../../types/winery';
 import ExperienceBooking from './ExperienceBooking';
 import ReviewsSection from '../reviews/ReviewsSection';
@@ -82,10 +83,12 @@ export default function WineryDetail({ winery }: WineryDetailProps) {
       {/* Hero Section */}
       <div className="relative h-64 md:h-96 bg-gray-300">
         {winery.bannerUrl || winery.images?.[0] ? (
-          <img
+          <Image
+            unoptimized
             src={winery.bannerUrl || winery.images[0]}
             alt={winery.name}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">

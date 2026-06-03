@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface BookingData {
   id: string;
@@ -47,9 +47,45 @@ export default function AdminBookingsPage() {
     fetchBookings();
   }, []);
 
+  const applyFilters = useCallback(() => {
+    let filtered = [...bookings];
+
+    // Status filter
+    if (statusFilter !== 'ALL') {
+      filtered = filtered.filter(booking => booking.status === statusFilter);
+    }
+
+    // Payment filter
+    if (paymentFilter !== 'ALL') {
+      filtered = filtered.filter(booking => booking.paymentStatus === paymentFilter);
+    }
+
+    // Date filter
+    if (dateFilter) {
+      const filterDate = new Date(dateFilter);
+      filtered = filtered.filter(booking => {
+        const bookingDate = new Date(booking.bookingDate);
+        return bookingDate.toDateString() === filterDate.toDateString();
+      });
+    }
+
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(booking =>
+        booking.user.name.toLowerCase().includes(query) ||
+        booking.user.email.toLowerCase().includes(query) ||
+        booking.winery.name.toLowerCase().includes(query) ||
+        booking.experience.title.toLowerCase().includes(query)
+      );
+    }
+
+    setFilteredBookings(filtered);
+  }, [bookings, statusFilter, paymentFilter, dateFilter, searchQuery]);
+
   useEffect(() => {
     applyFilters();
-  }, [bookings, statusFilter, paymentFilter, dateFilter, searchQuery]);
+  }, [applyFilters]);
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -139,47 +175,12 @@ export default function AdminBookingsPage() {
       ];
 
       setBookings(mockBookings);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch bookings');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch bookings';
+      setError(message);
     } finally {
       setLoading(false);
     }
-  };
-
-  const applyFilters = () => {
-    let filtered = [...bookings];
-
-    // Status filter
-    if (statusFilter !== 'ALL') {
-      filtered = filtered.filter(booking => booking.status === statusFilter);
-    }
-
-    // Payment filter
-    if (paymentFilter !== 'ALL') {
-      filtered = filtered.filter(booking => booking.paymentStatus === paymentFilter);
-    }
-
-    // Date filter
-    if (dateFilter) {
-      const filterDate = new Date(dateFilter);
-      filtered = filtered.filter(booking => {
-        const bookingDate = new Date(booking.bookingDate);
-        return bookingDate.toDateString() === filterDate.toDateString();
-      });
-    }
-
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(booking =>
-        booking.user.name.toLowerCase().includes(query) ||
-        booking.user.email.toLowerCase().includes(query) ||
-        booking.winery.name.toLowerCase().includes(query) ||
-        booking.experience.title.toLowerCase().includes(query)
-      );
-    }
-
-    setFilteredBookings(filtered);
   };
 
   const updateBookingStatus = async (bookingId: string, newStatus: BookingData['status']) => {
@@ -192,8 +193,9 @@ export default function AdminBookingsPage() {
       ));
       setSuccess(`Booking status updated to ${newStatus}`);
       setTimeout(() => setSuccess(''), 3000);
-    } catch (err: any) {
-      setError(err.message || 'Failed to update booking status');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to update booking status';
+      setError(message);
     } finally {
       setLoading(false);
     }

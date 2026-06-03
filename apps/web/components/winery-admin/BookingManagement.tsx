@@ -27,6 +27,22 @@ interface Booking {
   };
 }
 
+interface ApiBookingResponse {
+  id: string;
+  bookingDate: string;
+  guestCount: number;
+  totalAmount: number;
+  status: string;
+  guestName: string;
+  guestEmail: string;
+  guestPhone?: string;
+  specialRequests?: string;
+  createdAt: string;
+  paidAt?: string;
+  experience?: { id?: string; title?: string; type?: string };
+  user?: { id?: string; name?: string; email?: string };
+}
+
 type BookingFilter = 'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled';
 type DateFilter = 'all' | 'today' | 'week' | 'month';
 
@@ -91,12 +107,12 @@ export default function BookingManagement() {
           const bookingsData = await bookingsResponse.json();
           
           // Transform API data to match component interface
-          const transformedBookings: Booking[] = bookingsData.bookings?.map((booking: any) => ({
+          const transformedBookings: Booking[] = bookingsData.bookings?.map((booking: ApiBookingResponse) => ({
             id: booking.id,
             bookingDate: booking.bookingDate,
             guestCount: booking.guestCount,
             totalAmount: booking.totalAmount,
-            status: booking.status,
+            status: booking.status as Booking['status'],
             guestName: booking.guestName,
             guestEmail: booking.guestEmail,
             guestPhone: booking.guestPhone,
@@ -117,9 +133,9 @@ export default function BookingManagement() {
           
           setBookings(transformedBookings);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Failed to fetch bookings:', error);
-        if (error.message?.includes('Failed to fetch')) {
+        if (error instanceof Error && error.message?.includes('Failed to fetch')) {
           setApiError('Backend API is not available. Please start the backend server on localhost:3001');
         } else {
           setApiError('Failed to load booking data. Please try again.');

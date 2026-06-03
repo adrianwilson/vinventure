@@ -28,8 +28,8 @@ function VerifyEmailContent() {
         router.push('/auth?verified=true');
       }, 2000);
       
-    } catch (err: any) {
-      setError(err.message || 'Verification failed');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Verification failed');
     } finally {
       setLoading(false);
     }
@@ -48,8 +48,8 @@ function VerifyEmailContent() {
     try {
       await CognitoAuthService.resendConfirmationCode(email);
       setSuccess('Verification code resent! Please check your email.');
-    } catch (err: any) {
-      setError(err.message || 'Failed to resend code');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to resend code');
     } finally {
       setLoading(false);
     }

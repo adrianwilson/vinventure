@@ -194,7 +194,7 @@ export default function WineryAdminPage() {
               ].map((tab) => (
                 <button
                   key={tab.key}
-                  onClick={() => setActiveTab(tab.key as any)}
+                  onClick={() => setActiveTab(tab.key as 'overview' | 'winery' | 'bookings' | 'analytics')}
                   className={`py-2 px-1 border-b-2 font-medium text-sm ${
                     activeTab === tab.key
                       ? 'border-purple-500 text-purple-600'

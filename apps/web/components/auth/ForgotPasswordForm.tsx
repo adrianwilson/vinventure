@@ -30,8 +30,8 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
       await resetPassword(email);
       setCodeSent(true);
       setMessage('Check your email for your password reset code');
-    } catch (err: any) {
-      setError(err.message || 'Failed to send reset code');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to send reset code');
     } finally {
       setLoading(false);
     }
@@ -58,8 +58,8 @@ export default function ForgotPasswordForm({ onBack }: ForgotPasswordFormProps) 
       await confirmResetPassword(email, code, newPassword);
       setResetComplete(true);
       setMessage('Password reset successfully! You can now sign in.');
-    } catch (err: any) {
-      setError(err.message || 'Failed to reset password');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to reset password');
     } finally {
       setLoading(false);
     }

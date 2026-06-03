@@ -2,7 +2,7 @@
 
 import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Navigation from '../../components/ui/Navigation';
 import { getRoleDisplayName, canAccessPlatformAdmin } from '../../lib/roles';
 
@@ -41,7 +41,7 @@ function UserRoleAssignment({ user, onRoleUpdate }: UserRoleAssignmentProps) {
     <div className="flex items-center space-x-3">
       <select
         value={selectedRole}
-        onChange={(e) => setSelectedRole(e.target.value as any)}
+        onChange={(e) => setSelectedRole(e.target.value as 'GUEST' | 'WINERY_ADMIN' | 'PLATFORM_ADMIN')}
         className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
         disabled={loading}
       >
@@ -91,21 +91,15 @@ export default function AdminPage() {
     accessToken: 'dev-token',
   };
 
-  useEffect(() => {
-    if (mounted) {
-      fetchUsers();
-    }
-  }, [mounted]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoadingUsers(true);
     setApiError(null);
-    
+
     try {
       // Try to fetch from backend API
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'}/api/admin/users`, {
         headers: {
           'Authorization': `Bearer ${currentUser.accessToken || 'dev-token'}`,
@@ -113,7 +107,7 @@ export default function AdminPage() {
         },
         signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
 
       if (response.ok) {
@@ -122,10 +116,11 @@ export default function AdminPage() {
       } else {
         throw new Error(`API returned ${response.status}`);
       }
-    } catch (error: any) {
-      console.warn('Failed to fetch users from API, using mock data:', error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      console.warn('Failed to fetch users from API, using mock data:', message);
       setApiError('Backend API is not available. Using development mock data.');
-      
+
       // Mock users for development
       setUsers([
         {
@@ -137,7 +132,7 @@ export default function AdminPage() {
           isActive: true
         },
         {
-          id: '2', 
+          id: '2',
           email: 'bob@wineryowner.com',
           name: 'Bob Smith',
           role: 'WINERY_ADMIN',
@@ -164,7 +159,13 @@ export default function AdminPage() {
     } finally {
       setLoadingUsers(false);
     }
-  };
+  }, [currentUser.accessToken]);
+
+  useEffect(() => {
+    if (mounted) {
+      fetchUsers();
+    }
+  }, [mounted, fetchUsers]);
 
   const handleRoleUpdate = async (userId: string, newRole: 'GUEST' | 'WINERY_ADMIN' | 'PLATFORM_ADMIN') => {
     try {

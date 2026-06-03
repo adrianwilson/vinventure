@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 
 interface Review {
   id: string;
@@ -93,10 +94,12 @@ function ReviewCard({ review }: { review: Review }) {
                     onClick={() => setSelectedImage(imageUrl)}
                     className="relative aspect-square rounded-md overflow-hidden hover:opacity-90 transition-opacity"
                   >
-                    <img
+                    <Image
+                      unoptimized
                       src={imageUrl}
                       alt={`Review photo ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   </button>
                 ))}
@@ -131,9 +134,12 @@ function ReviewCard({ review }: { review: Review }) {
           onClick={() => setSelectedImage(null)}
         >
           <div className="relative max-w-4xl max-h-full">
-            <img
+            <Image
+              unoptimized
               src={selectedImage}
               alt="Review photo"
+              width={800}
+              height={600}
               className="max-w-full max-h-full object-contain"
             />
             <button

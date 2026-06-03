@@ -86,8 +86,8 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
 
         router.push('/dashboard');
       }
-    } catch (err: any) {
-      setError(err.message || 'Registration failed');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -118,16 +118,16 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
       }
 
       router.push('/dashboard');
-    } catch (err: any) {
-      throw new Error(err.message || 'Email verification failed');
+    } catch (err: unknown) {
+      throw new Error(err instanceof Error ? err.message : 'Email verification failed');
     }
   };
 
   const handleResendCode = async () => {
     try {
       await signUp(formData.email, formData.password, formData.name, formData.role);
-    } catch (err: any) {
-      throw new Error(err.message || 'Failed to resend verification code');
+    } catch (err: unknown) {
+      throw new Error(err instanceof Error ? err.message : 'Failed to resend verification code');
     }
   };
 

@@ -89,9 +89,9 @@ export default function WineryManagement() {
           setWinery(wineryData);
           setExperiences(wineryData.experiences || []);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Failed to fetch winery data:', error);
-        if (error.message?.includes('Failed to fetch')) {
+        if (error instanceof Error && error.message?.includes('Failed to fetch')) {
           setApiError('Backend API is not available. Please start the backend server on localhost:3001');
         } else {
           setApiError('Failed to load winery data. Please try again.');
@@ -302,7 +302,7 @@ export default function WineryManagement() {
           ].map((section) => (
             <button
               key={section.key}
-              onClick={() => setActiveSection(section.key as any)}
+              onClick={() => setActiveSection(section.key as 'profile' | 'experiences')}
               className={`py-2 px-1 border-b-2 font-medium text-sm ${
                 activeSection === section.key
                   ? 'border-purple-500 text-purple-600'

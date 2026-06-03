@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface ReviewFormProps {
@@ -157,9 +158,12 @@ export default function ReviewForm({
             <div className="mt-4 grid grid-cols-3 gap-4">
               {images.map((imageUrl, index) => (
                 <div key={index} className="relative">
-                  <img
+                  <Image
+                    unoptimized
                     src={imageUrl}
                     alt={`Review photo ${index + 1}`}
+                    width={200}
+                    height={96}
                     className="w-full h-24 object-cover rounded-md"
                   />
                   <button

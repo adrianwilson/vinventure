@@ -3,9 +3,17 @@
 import { useState } from 'react';
 import { CognitoAuthService } from '../../../lib/cognito';
 
+interface UserInfo {
+  attributes?: Record<string, string>;
+  userStatus?: string;
+  enabled?: boolean;
+  userCreateDate?: string;
+  userLastModifiedDate?: string;
+}
+
 export default function AdminUsersPage() {
   const [email, setEmail] = useState('');
-  const [userInfo, setUserInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -20,8 +28,8 @@ export default function AdminUsersPage() {
     try {
       const user = await CognitoAuthService.adminGetUser(email);
       setUserInfo(user);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -38,8 +46,8 @@ export default function AdminUsersPage() {
       // Refresh user info
       const user = await CognitoAuthService.adminGetUser(email);
       setUserInfo(user);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
@@ -53,8 +61,8 @@ export default function AdminUsersPage() {
     try {
       await CognitoAuthService.resendConfirmationCode(email);
       setMessage('Confirmation code resent successfully!');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }

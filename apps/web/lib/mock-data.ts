@@ -248,7 +248,7 @@ export function searchWineries(params: {
 
   if (params.wineType) {
     filteredWineries = filteredWineries.filter(winery =>
-      winery.wineTypes.includes(params.wineType!)
+      params.wineType && winery.wineTypes.includes(params.wineType)
     );
   }
 

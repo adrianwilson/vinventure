@@ -48,7 +48,7 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
   const [error, setError] = useState('');
   const [step, setStep] = useState(1); // 1: Details, 2: Payment, 3: Confirmation
   const [, setPaymentIntentId] = useState<string | null>(null);
-  const [, setBooking] = useState<any>(null);
+  const [, setBooking] = useState<Record<string, unknown> | null>(null);
 
   // Generate available dates for the next 60 days
   const getAvailableDates = () => {
@@ -156,7 +156,7 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
       let result;
       try {
         result = await response.json();
-      } catch (jsonError) {
+      } catch {
         throw new Error(`Server error: ${response.status} ${response.statusText}`);
       }
 
@@ -168,9 +168,9 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
       setBooking(result.booking);
       setStep(3);
         
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Booking creation error:', err);
-      setError(err.message || 'Failed to create booking. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to create booking. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -217,7 +217,7 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
       let result;
       try {
         result = await response.json();
-      } catch (jsonError) {
+      } catch {
         throw new Error(`Server error: ${response.status} ${response.statusText}`);
       }
 
@@ -229,9 +229,9 @@ export default function ExperienceBooking({ winery, experience, onClose }: Exper
       setBooking(result.booking);
       setStep(3);
         
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Booking creation error:', err);
-      setError(err.message || 'Failed to create booking. Please try again.');
+      setError(err instanceof Error ? err.message : 'Failed to create booking. Please try again.');
     } finally {
       setLoading(false);
     }

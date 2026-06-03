@@ -8,7 +8,7 @@ interface AuthContextType {
   loading: boolean;
   isAvailable: boolean;
   signIn: (email: string, password: string) => Promise<CognitoUser>;
-  signUp: (email: string, password: string, displayName: string, role?: 'GUEST' | 'WINERY_ADMIN') => Promise<{ user: any; confirmationRequired: boolean }>;
+  signUp: (email: string, password: string, displayName: string, role?: 'GUEST' | 'WINERY_ADMIN') => Promise<{ user: unknown; confirmationRequired: boolean }>;
   confirmEmail: (email: string, code: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -112,7 +112,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     password: string, 
     displayName: string, 
     role: 'GUEST' | 'WINERY_ADMIN' = 'GUEST'
-  ): Promise<{ user: any; confirmationRequired: boolean }> => {
+  ): Promise<{ user: unknown; confirmationRequired: boolean }> => {
     return await CognitoAuthService.signUp({ email, password, name: displayName });
   };
 

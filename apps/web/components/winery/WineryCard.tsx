@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Winery, EXPERIENCE_TYPE_LABELS } from '../../types/winery';
 
 // Icon components
@@ -64,10 +65,12 @@ export default function WineryCard({
       {/* Image Section */}
       <div className="relative h-48 bg-gray-200">
         {winery.bannerUrl || winery.images?.[0] ? (
-          <img
+          <Image
+            unoptimized
             src={winery.bannerUrl || winery.images[0]}
             alt={winery.name}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">

@@ -92,7 +92,8 @@ describe('EmailVerificationForm', () => {
   it('shows error when submitting empty code', async () => {
     render(<EmailVerificationForm {...mockProps} />);
 
-    const form = screen.getByRole('button', { name: /verify/i }).closest('form')!;
+    const form = screen.getByRole('button', { name: /verify/i }).closest('form');
+    if (!form) throw new Error('Form element not found');
     fireEvent.submit(form);
 
     await waitFor(() => {
