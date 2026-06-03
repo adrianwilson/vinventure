@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "aws-cdk-lib": "^2.202.0",
-    "constructs": "^10.4.2",
+    "constructs": "^10.6.0",
     "@aws-solutions-constructs/aws-cloudfront-s3": "^2.85.6",
     "source-map-support": "^0.5.21"
   },
