@@ -27,7 +27,7 @@ export default function WineryFiltersComponent({
 }: WineryFiltersProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const updateFilter = (key: keyof WineryFilters, value: any) => {
+  const updateFilter = (key: keyof WineryFilters, value: string | boolean) => {
     onFiltersChange({
       ...filters,
       [key]: value

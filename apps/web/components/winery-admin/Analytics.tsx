@@ -3,6 +3,34 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
+interface ApiBooking {
+  id: string;
+  createdAt: string;
+  status: string;
+  totalAmount: number;
+  experience?: {
+    id: string;
+    title: string;
+  };
+}
+
+interface ApiReview {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  user?: { name?: string };
+  experience?: { id: string; title?: string };
+}
+
+interface ExperienceAccumulator {
+  id: string;
+  title: string;
+  bookings: number;
+  revenue: number;
+  ratings: number[];
+}
+
 interface AnalyticsData {
   totalBookings: number;
   totalRevenue: number;
@@ -107,14 +135,14 @@ export default function Analytics() {
           }[timeRange];
           
           const cutoffDate = new Date(now.getTime() - daysBack * 24 * 60 * 60 * 1000);
-          const filteredBookings = bookings.filter((booking: any) => 
+          const filteredBookings = bookings.filter((booking: ApiBooking) => 
             new Date(booking.createdAt) >= cutoffDate
           );
           
           // Calculate total bookings and revenue
           const totalBookings = filteredBookings.length;
-          const completedBookings = filteredBookings.filter((b: any) => b.status === 'COMPLETED' || b.status === 'CONFIRMED');
-          const totalRevenue = completedBookings.reduce((sum: number, booking: any) => sum + booking.totalAmount, 0);
+          const completedBookings = filteredBookings.filter((b: ApiBooking) => b.status === 'COMPLETED' || b.status === 'CONFIRMED');
+          const totalRevenue = completedBookings.reduce((sum: number, booking: ApiBooking) => sum + booking.totalAmount, 0);
           
           // Calculate monthly breakdown (last 4 months)
           const monthlyData = [];
@@ -122,14 +150,14 @@ export default function Analytics() {
             const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
             const nextMonth = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
             
-            const monthBookings = filteredBookings.filter((booking: any) => {
+            const monthBookings = filteredBookings.filter((booking: ApiBooking) => {
               const bookingDate = new Date(booking.createdAt);
               return bookingDate >= monthDate && bookingDate < nextMonth;
             });
             
             const monthRevenue = monthBookings
-              .filter((b: any) => b.status === 'COMPLETED' || b.status === 'CONFIRMED')
-              .reduce((sum: number, booking: any) => sum + booking.totalAmount, 0);
+              .filter((b: ApiBooking) => b.status === 'COMPLETED' || b.status === 'CONFIRMED')
+              .reduce((sum: number, booking: ApiBooking) => sum + booking.totalAmount, 0);
             
             monthlyData.push({
               month: monthDate.toLocaleDateString('en-US', { month: 'short' }),
@@ -139,14 +167,14 @@ export default function Analytics() {
           }
           
           // Calculate experience performance
-          const experienceMap = new Map();
-          filteredBookings.forEach((booking: any) => {
+          const experienceMap = new Map<string, ExperienceAccumulator>();
+          filteredBookings.forEach((booking: ApiBooking) => {
             const expId = booking.experience?.id;
             if (expId) {
               if (!experienceMap.has(expId)) {
                 experienceMap.set(expId, {
                   id: expId,
-                  title: booking.experience.title,
+                  title: booking.experience?.title ?? '',
                   bookings: 0,
                   revenue: 0,
                   ratings: []
@@ -154,18 +182,20 @@ export default function Analytics() {
               }
               
               const exp = experienceMap.get(expId);
-              exp.bookings++;
-              if (booking.status === 'COMPLETED' || booking.status === 'CONFIRMED') {
-                exp.revenue += booking.totalAmount;
+              if (exp) {
+                exp.bookings++;
+                if (booking.status === 'COMPLETED' || booking.status === 'CONFIRMED') {
+                  exp.revenue += booking.totalAmount;
+                }
               }
             }
           });
           
           // Add review ratings to experiences
-          reviews.forEach((review: any) => {
+          reviews.forEach((review: ApiReview) => {
             const expId = review.experience?.id;
             if (expId && experienceMap.has(expId)) {
-              experienceMap.get(expId).ratings.push(review.rating);
+              experienceMap.get(expId)?.ratings.push(review.rating);
             }
           });
           
@@ -178,9 +208,9 @@ export default function Analytics() {
           
           // Get recent reviews
           const recentReviews = reviews
-            .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+            .sort((a: ApiReview, b: ApiReview) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             .slice(0, 3)
-            .map((review: any) => ({
+            .map((review: ApiReview) => ({
               id: review.id,
               rating: review.rating,
               comment: review.comment,
@@ -201,9 +231,9 @@ export default function Analytics() {
           
           setAnalytics(analyticsData);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Failed to fetch analytics:', error);
-        if (error.message?.includes('Failed to fetch')) {
+        if (error instanceof Error && error.message?.includes('Failed to fetch')) {
           setApiError('Backend API is not available. Please start the backend server on localhost:3001');
         } else {
           setApiError('Failed to load analytics data. Please try again.');
@@ -301,7 +331,7 @@ export default function Analytics() {
           <h3 className="text-lg font-semibold text-gray-900">Analytics Dashboard</h3>
           <select
             value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value as any)}
+            onChange={(e) => setTimeRange(e.target.value as '30days' | '90days' | '6months' | '1year')}
             className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500"
           >
             <option value="30days">Last 30 Days</option>

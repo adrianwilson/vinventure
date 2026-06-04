@@ -22,7 +22,7 @@ export async function verifyCognitoToken(token: string) {
       exp: payload.exp,
       iat: payload.iat,
     };
-  } catch (error) {
+  } catch {
     throw new Error('Invalid token');
   }
 }

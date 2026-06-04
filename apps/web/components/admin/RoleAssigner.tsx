@@ -55,7 +55,7 @@ export default function RoleAssigner({ onRoleUpdated }: RoleAssignerProps) {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user!.accessToken}`,
+          'Authorization': `Bearer ${user?.accessToken ?? ''}`,
         },
         body: JSON.stringify({ role: selectedRole }),
         signal: controller.signal,
@@ -71,10 +71,10 @@ export default function RoleAssigner({ onRoleUpdated }: RoleAssignerProps) {
       setMessage(`✅ ${result.message} - Please refresh the page to see changes.`);
       
       onRoleUpdated?.();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to assign role:', error);
-      
-      if (error.name === 'AbortError') {
+
+      if (error instanceof Error && error.name === 'AbortError') {
         // Backend timeout - fall back to development mode
         console.log(`[DEV] Backend timeout, simulating role assignment: ${selectedRole}`);
         
@@ -110,7 +110,7 @@ export default function RoleAssigner({ onRoleUpdated }: RoleAssignerProps) {
           </label>
           <select
             value={selectedRole}
-            onChange={(e) => setSelectedRole(e.target.value as any)}
+            onChange={(e) => setSelectedRole(e.target.value as 'GUEST' | 'WINERY_ADMIN' | 'PLATFORM_ADMIN')}
             className="block w-full px-3 py-2 border border-yellow-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500"
           >
             <option value="GUEST">Guest</option>

@@ -71,7 +71,7 @@ export class CognitoAuthService {
     return !!(this.config.userPoolId && this.config.clientId);
   }
 
-  static async signUp(data: SignUpData): Promise<{ user: any; confirmationRequired: boolean }> {
+  static async signUp(data: SignUpData): Promise<{ user: unknown; confirmationRequired: boolean }> {
     if (!this.isConfigured()) {
       throw new Error('Cognito is not configured. Please set up Cognito credentials.');
     }
@@ -105,8 +105,8 @@ export class CognitoAuthService {
         },
         confirmationRequired: !response.UserConfirmed,
       };
-    } catch (error: any) {
-      throw new Error(error.message || 'Sign up failed');
+    } catch (error: unknown) {
+      throw new Error(error instanceof Error ? error.message : 'Sign up failed');
     }
   }
 
@@ -137,7 +137,7 @@ export class CognitoAuthService {
 
       // Get user attributes
       const getUserCommand = new GetUserCommand({
-        AccessToken: tokens.AccessToken!,
+        AccessToken: tokens.AccessToken ?? '',
       });
 
       const userResponse = await client.send(getUserCommand);
@@ -157,8 +157,8 @@ export class CognitoAuthService {
         idToken: tokens.IdToken || '',
         refreshToken: tokens.RefreshToken || '',
       };
-    } catch (error: any) {
-      throw new Error(error.message || 'Sign in failed');
+    } catch (error: unknown) {
+      throw new Error(error instanceof Error ? error.message : 'Sign in failed');
     }
   }
 
@@ -175,8 +175,8 @@ export class CognitoAuthService {
       });
 
       await client.send(command);
-    } catch (error: any) {
-      throw new Error(error.message || 'Sign out failed');
+    } catch (error: unknown) {
+      throw new Error(error instanceof Error ? error.message : 'Sign out failed');
     }
   }
 
@@ -194,8 +194,8 @@ export class CognitoAuthService {
       });
 
       await client.send(command);
-    } catch (error: any) {
-      throw new Error(error.message || 'Password reset failed');
+    } catch (error: unknown) {
+      throw new Error(error instanceof Error ? error.message : 'Password reset failed');
     }
   }
 
@@ -214,8 +214,8 @@ export class CognitoAuthService {
       });
 
       await client.send(command);
-    } catch (error: any) {
-      throw new Error(error.message || 'Email confirmation failed');
+    } catch (error: unknown) {
+      throw new Error(error instanceof Error ? error.message : 'Email confirmation failed');
     }
   }
 
@@ -239,8 +239,8 @@ export class CognitoAuthService {
       });
 
       await client.send(command);
-    } catch (error: any) {
-      throw new Error(error.message || 'Password confirmation failed');
+    } catch (error: unknown) {
+      throw new Error(error instanceof Error ? error.message : 'Password confirmation failed');
     }
   }
 
@@ -311,17 +311,18 @@ export class CognitoAuthService {
             baseUser.role = profileData.role || 'GUEST';
             baseUser.displayName = profileData.name || baseUser.displayName;
           }
-        } catch (error: any) {
-          if (error.name === 'AbortError') {
+        } catch (error: unknown) {
+          if (error instanceof Error && error.name === 'AbortError') {
             console.warn('Backend API request timed out, defaulting to GUEST role');
           } else {
-            console.warn('Could not fetch user role from backend, defaulting to GUEST:', error.message);
+            const message = error instanceof Error ? error.message : 'Unknown error';
+            console.warn('Could not fetch user role from backend, defaulting to GUEST:', message);
           }
         }
       }
 
       return baseUser;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -357,8 +358,8 @@ export class CognitoAuthService {
         accessToken: tokens.AccessToken || '',
         idToken: tokens.IdToken || '',
       };
-    } catch (error: any) {
-      throw new Error(error.message || 'Token refresh failed');
+    } catch (error: unknown) {
+      throw new Error(error instanceof Error ? error.message : 'Token refresh failed');
     }
   }
 
@@ -376,8 +377,8 @@ export class CognitoAuthService {
       });
 
       await client.send(command);
-    } catch (error: any) {
-      throw new Error(error.message || 'Failed to resend confirmation code');
+    } catch (error: unknown) {
+      throw new Error(error instanceof Error ? error.message : 'Failed to resend confirmation code');
     }
   }
 
@@ -395,12 +396,19 @@ export class CognitoAuthService {
       });
 
       await client.send(command);
-    } catch (error: any) {
-      throw new Error(error.message || 'Admin confirmation failed');
+    } catch (error: unknown) {
+      throw new Error(error instanceof Error ? error.message : 'Admin confirmation failed');
     }
   }
 
-  static async adminGetUser(email: string): Promise<any> {
+  static async adminGetUser(email: string): Promise<{
+    username: string | undefined;
+    userStatus: string | undefined;
+    enabled: boolean | undefined;
+    userCreateDate: Date | undefined;
+    userLastModifiedDate: Date | undefined;
+    attributes: Record<string, string>;
+  }> {
     if (!this.isConfigured()) {
       throw new Error('Cognito is not configured. Please set up Cognito credentials.');
     }
@@ -425,10 +433,10 @@ export class CognitoAuthService {
             acc[attr.Name] = attr.Value;
           }
           return acc;
-        }, {} as Record<string, string>),
+        }, {} as Record<string, string>) ?? {},
       };
-    } catch (error: any) {
-      throw new Error(error.message || 'Failed to get user information');
+    } catch (error: unknown) {
+      throw new Error(error instanceof Error ? error.message : 'Failed to get user information');
     }
   }
 

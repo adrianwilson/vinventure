@@ -33,8 +33,8 @@ export function EmailVerificationForm({
 
     try {
       await onVerify(code.trim());
-    } catch (err: any) {
-      setError(err.message || 'Invalid verification code');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Invalid verification code');
     } finally {
       setIsVerifying(false);
     }
@@ -48,8 +48,8 @@ export function EmailVerificationForm({
 
     try {
       await onResendCode();
-    } catch (err: any) {
-      setError(err.message || 'Failed to resend verification code');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to resend verification code');
     } finally {
       setIsResending(false);
     }

@@ -115,8 +115,9 @@ export default function AdminWineriesPage() {
         }
       ];
       setWineries(mockWineries);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch wineries');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch wineries';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -156,8 +157,9 @@ export default function AdminWineriesPage() {
       setSelectedWinery(null);
       setActiveTab('list');
       fetchWineries();
-    } catch (err: any) {
-      setError(err.message || 'Failed to save winery');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save winery';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -194,8 +196,9 @@ export default function AdminWineriesPage() {
         w.id === wineryId ? { ...w, status: newStatus } : w
       ));
       setSuccess(`Winery status updated to ${newStatus}`);
-    } catch (err: any) {
-      setError(err.message || 'Failed to update status');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to update status';
+      setError(message);
     } finally {
       setLoading(false);
     }

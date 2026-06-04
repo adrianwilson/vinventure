@@ -182,7 +182,7 @@ export default function DashboardPage() {
               ].map((tab) => (
                 <button
                   key={tab.key}
-                  onClick={() => setActiveTab(tab.key as any)}
+                  onClick={() => setActiveTab(tab.key as 'overview' | 'bookings' | 'favorites')}
                   className={`py-2 px-2 sm:px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                     activeTab === tab.key
                       ? 'border-purple-500 text-purple-600'

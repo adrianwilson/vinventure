@@ -11,11 +11,20 @@ const compat = new FlatCompat({
 });
 
 export default [
+  {
+    ignores: [
+      '.next/**/*',
+      'out/**/*',
+      'generated/**/*',
+      'apps/web/generated/**/*',
+      'apps/web/out/**/*',
+      '**/out/**/*',
+      '**/generated/**/*',
+      '**/*.d.ts',
+    ],
+  },
   ...fixupConfigRules(compat.extends('next')),
   ...fixupConfigRules(compat.extends('next/core-web-vitals')),
   ...baseConfig,
   ...nx.configs['flat/react-typescript'],
-  {
-    ignores: ['.next/**/*', 'out/**/*', 'generated/**/*'],
-  },
 ];

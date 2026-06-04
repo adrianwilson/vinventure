@@ -18,6 +18,7 @@ const WineryMap: React.FC<WineryMapProps> = ({
   className = "w-full h-96"
 }) => {
   const mapRef = useRef<HTMLDivElement>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [markers, setMarkers] = useState<google.maps.Marker[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -54,8 +55,8 @@ const WineryMap: React.FC<WineryMapProps> = ({
     if (wineries.length > 0) {
       const wineriesWithCoords = wineries.filter(w => w.latitude && w.longitude);
       if (wineriesWithCoords.length > 0) {
-        const avgLat = wineriesWithCoords.reduce((sum, w) => sum + w.latitude!, 0) / wineriesWithCoords.length;
-        const avgLng = wineriesWithCoords.reduce((sum, w) => sum + w.longitude!, 0) / wineriesWithCoords.length;
+        const avgLat = wineriesWithCoords.reduce((sum, w) => sum + (w.latitude ?? 0), 0) / wineriesWithCoords.length;
+        const avgLng = wineriesWithCoords.reduce((sum, w) => sum + (w.longitude ?? 0), 0) / wineriesWithCoords.length;
         center = { lat: avgLat, lng: avgLng };
       }
     }
@@ -84,7 +85,7 @@ const WineryMap: React.FC<WineryMapProps> = ({
     if (!map || !window.google) return;
 
     // Clear existing markers
-    markers.forEach(marker => marker.setMap(null));
+    markersRef.current.forEach(marker => marker.setMap(null));
 
     const newMarkers: google.maps.Marker[] = [];
 
@@ -131,6 +132,7 @@ const WineryMap: React.FC<WineryMapProps> = ({
       newMarkers.push(marker);
     });
 
+    markersRef.current = newMarkers;
     setMarkers(newMarkers);
   }, [map, wineries, onWinerySelect]);
 

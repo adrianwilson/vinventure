@@ -137,14 +137,16 @@ export default function ReviewsSection({
       // });
       
       // Mock successful submission
+      if (!user) return;
+
       const newReview: Review = {
         id: `review_${Date.now()}`,
         ...reviewData,
         createdAt: new Date().toISOString(),
         user: {
-          id: user!.sub || user!.username,
-          displayName: user!.displayName ?? null,
-          email: user!.email
+          id: user.sub || user.username,
+          displayName: user.displayName ?? null,
+          email: user.email
         }
       };
 
@@ -157,7 +159,7 @@ export default function ReviewsSection({
 
       setShowReviewForm(false);
       setSelectedBooking(null);
-    } catch (error) {
+    } catch {
       throw new Error('Failed to submit review');
     }
   };

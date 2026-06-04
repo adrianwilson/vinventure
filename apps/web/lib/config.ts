@@ -18,8 +18,9 @@ export async function getAppConfig(): Promise<AppConfig> {
       throw new Error('Failed to fetch config');
     }
     
-    configCache = await response.json();
-    return configCache!;
+    const config: AppConfig = await response.json();
+    configCache = config;
+    return config;
   } catch (error) {
     console.error('Failed to load app config:', error);
     // Fallback to environment variables for local development

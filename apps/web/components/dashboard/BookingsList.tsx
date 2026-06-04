@@ -104,14 +104,16 @@ export default function BookingsList() {
           setIsLocal(false);
           console.log('Bookings loaded from API successfully');
           
-        } catch (apiError: any) {
+        } catch (apiError: unknown) {
           // API failed, fall back to localStorage without logging errors
-          if (apiError.name === 'TypeError' || apiError.message.includes('Failed to fetch')) {
+          const apiErrMsg = apiError instanceof Error ? apiError.message : '';
+          const apiErrName = apiError instanceof Error ? apiError.name : '';
+          if (apiErrName === 'TypeError' || apiErrMsg.includes('Failed to fetch')) {
             // Network error - silently fall back
             console.log('API unavailable, loading from localStorage');
-          } else if (apiError.message.includes('API_NON_JSON')) {
+          } else if (apiErrMsg.includes('API_NON_JSON')) {
             console.log('API returned non-JSON, loading from localStorage');
-          } else if (apiError.message.includes('API_ERROR')) {
+          } else if (apiErrMsg.includes('API_ERROR')) {
             console.log('API error occurred, loading from localStorage');
           } else {
             console.log('Unknown API issue, loading from localStorage');
@@ -123,7 +125,7 @@ export default function BookingsList() {
           setIsLocal(true);
           setError('');
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         // This should only catch non-API errors (like missing user email, etc.)
         console.error('Unexpected error in fetchBookings:', err);
         
