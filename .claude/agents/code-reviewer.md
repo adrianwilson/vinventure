@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Read-only code reviewer for quality, security, and consistency. Use proactively after writing or modifying code, or when asked to review changes.
-tools: Read, Grep, Glob, Bash
+tools: Read, Grep, Glob
 model: inherit
 color: purple
 ---

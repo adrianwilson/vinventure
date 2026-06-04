@@ -1,7 +1,7 @@
 ---
 name: test-writer
 description: Test specialist that writes unit tests (Jest) and E2E tests (Playwright). Use after implementing features or fixing bugs to ensure test coverage.
-tools: Read, Write, Edit, Grep, Glob, Bash
+tools: Read, Write, Edit, Grep, Glob, Bash(npx:*), Bash(pnpm:*), Bash(nx:*), Bash(cd:*), Bash(mkdir:*)
 model: inherit
 memory: project
 color: yellow
