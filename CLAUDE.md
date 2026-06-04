@@ -1,3 +1,7 @@
+## Git Workflow
+
+- **Always create a new branch from the latest `main`** before starting any work.
+- Pull `main`, then branch: `git checkout main && git pull && git checkout -b <branch-name>`
 
 ## Skill routing
 
