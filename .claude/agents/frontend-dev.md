@@ -1,7 +1,7 @@
 ---
 name: frontend-dev
 description: Next.js frontend specialist for the web app. Use when working on React components, pages, contexts, styling, or anything in the apps/web/ directory.
-tools: Read, Edit, Write, Grep, Glob, Bash
+tools: Read, Edit, Write, Grep, Glob, Bash(npx:*), Bash(pnpm:*), Bash(nx:*), Bash(node:*), Bash(cd:*), Bash(mkdir:*)
 model: inherit
 memory: project
 color: green

@@ -1,7 +1,7 @@
 ---
 name: infra
 description: AWS infrastructure and DevOps specialist. Use when working on CDK stacks, CI/CD workflows, Lambda deployment, CloudFront, S3, Aurora, or anything in apps/infrastructure/ or .github/workflows/.
-tools: Read, Edit, Write, Grep, Glob, Bash
+tools: Read, Edit, Write, Grep, Glob, Bash(npx:*), Bash(pnpm:*), Bash(cd:*), Bash(mkdir:*), Bash(aws:*)
 model: inherit
 memory: project
 color: orange

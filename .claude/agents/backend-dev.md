@@ -1,7 +1,7 @@
 ---
 name: backend-dev
 description: NestJS backend specialist for the Lambda API. Use when working on API endpoints, services, controllers, DTOs, auth, Prisma database queries, or anything in the lambda/src/ directory.
-tools: Read, Edit, Write, Grep, Glob, Bash
+tools: Read, Edit, Write, Grep, Glob, Bash(npx:*), Bash(pnpm:*), Bash(node:*), Bash(cd:*), Bash(mkdir:*)
 model: inherit
 memory: project
 color: blue
