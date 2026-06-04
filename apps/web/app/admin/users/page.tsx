@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { CognitoAuthService } from '../../../lib/cognito';
 
 interface UserInfo {
-  attributes?: Record<string, string>;
+  username?: string;
+  attributes: Record<string, string>;
   userStatus?: string;
   enabled?: boolean;
-  userCreateDate?: string;
-  userLastModifiedDate?: string;
+  userCreateDate?: Date;
+  userLastModifiedDate?: Date;
 }
 
 export default function AdminUsersPage() {
@@ -128,8 +129,8 @@ export default function AdminUsersPage() {
                 </span>
               </p>
               <p><strong>Enabled:</strong> {userInfo.enabled ? 'Yes' : 'No'}</p>
-              <p><strong>Created:</strong> {new Date(userInfo.userCreateDate).toLocaleString()}</p>
-              <p><strong>Last Modified:</strong> {new Date(userInfo.userLastModifiedDate).toLocaleString()}</p>
+              <p><strong>Created:</strong> {userInfo.userCreateDate?.toLocaleString() ?? 'N/A'}</p>
+              <p><strong>Last Modified:</strong> {userInfo.userLastModifiedDate?.toLocaleString() ?? 'N/A'}</p>
             </div>
 
             {userInfo.userStatus === 'UNCONFIRMED' && (

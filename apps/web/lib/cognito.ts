@@ -433,7 +433,7 @@ export class CognitoAuthService {
             acc[attr.Name] = attr.Value;
           }
           return acc;
-        }, {} as Record<string, string>),
+        }, {} as Record<string, string>) ?? {},
       };
     } catch (error: unknown) {
       throw new Error(error instanceof Error ? error.message : 'Failed to get user information');
