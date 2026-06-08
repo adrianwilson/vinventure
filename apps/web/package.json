@@ -15,7 +15,7 @@
     "@heroicons/react": "^2.0.18",
     "@prisma/client": "^6.10.1",
     "@stripe/react-stripe-js": "^2.4.0",
-    "@stripe/stripe-js": "^2.4.0",
+    "@stripe/stripe-js": "^9.7.0",
     "aws-jwt-verify": "^4.0.1",
     "next": "~15.5.18",
     "react": "19.0.0",
